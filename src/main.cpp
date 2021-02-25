@@ -9,6 +9,9 @@ class MiniSPIFFS : public LogFS {
     data[address] = value;
     return address + 1;
   }
+  uint8_t readByte(uint32_t address) {
+    return data[address];
+  }
 };
 
 MiniSPIFFS fs;
@@ -18,6 +21,7 @@ int main() {
 
 
   fs.format(16 * 1024 * 1024);
+  fs.init();
 
   for (int i = 0; i < 100; i++) {
     std::cout << int(data[i]) << ',';
