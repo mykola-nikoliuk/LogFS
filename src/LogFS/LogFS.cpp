@@ -1,10 +1,9 @@
-#include <iostream>
 #include <string.h>
 #include "./LogFS.h"
 #include "./Header.h"
 #include "./config.h"
 
-bool LogFS::init() {
+uint8_t LogFS::init() {
   uint32_t address = 0;
 
   uint8_t fsNameLength = strlen(LogFSHeader::name);
@@ -13,29 +12,23 @@ bool LogFS::init() {
   address += strlen(LogFSHeader::name);
 
   if (strcmp(fsName, LogFSHeader::name)) {
-    std::cout << "Memory is not formatted with LogFS\n";
-    return false;
+    return LOGFS_ERR_NOT_FORMATTED;
   }
 
-
   if (LogFSHeader::version != readByte(address)) {
-    std::cout << "Incompatible version, format with current or use previous version of LogFS\n";
-    return false;
+    return LOGFS_ERR_DIFFERENT_VERSION;
   }
   address += sizeof(_header.version);
 
   _header.pageSize = readShort(address);
   address += sizeof(_header.pageSize);
-  std::cout << "pageSize: " << _header.pageSize << "\n";
 
   _header.pagesAmount = readShort(address);
   address += sizeof(_header.pagesAmount);
-  std::cout << "pagesAmount: " << _header.pagesAmount << "\n";
 
   _header.filesAmount = readShort(address);
-  std::cout << "filesAmount: " << _header.filesAmount << "\n";
 
-  return true;
+  return LOGFS_OK;
 }
 
 uint32_t LogFS::writeShort(uint32_t address, uint16_t value) {
