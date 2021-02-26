@@ -1,7 +1,7 @@
 #include <string.h>
 #include <math.h>
 #include "./LogFS.h"
-#include "./File.h"
+#include "./TableFile.h"
 #include "./Header.h"
 #include "./config.h"
 
@@ -10,9 +10,9 @@ LogFS::LogFS(FSIO* fsio) {
 }
 
 uint32_t LogFS::writeEmptyFileTable(uint32_t address, uint16_t filesAmount) {
-  uint16_t fileSize = sizeof(struct LogFSFile);
+  uint16_t fileSize = sizeof(struct LogFSTableFile);
 
-  LogFSFile file;
+  LogFSTableFile file;
   file.isEmpty = true;
 
   for (uint16_t i = 0; i < filesAmount; i++) {
@@ -63,7 +63,7 @@ uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmo
   header.filesAmount = maxFilesAmount;
   header.filesStartAddress = sizeof(struct LogFSHeader);
 
-  header.pagesMapStartAddress = header.filesStartAddress + sizeof(struct LogFSFile) * uint32_t(maxFilesAmount);
+  header.pagesMapStartAddress = header.filesStartAddress + sizeof(struct LogFSTableFile) * uint32_t(maxFilesAmount);
   if (header.pagesMapStartAddress > capacity) return LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 
   int64_t memoryForPages = capacity - header.pagesMapStartAddress;
@@ -87,4 +87,37 @@ uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmo
 
 
   return LOGFS_OK;
+}
+
+LogFSFile* LogFS::createFile(char* name) {
+  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return NULL;
+
+  LogFSTableFile tableFile;
+
+  // look for free table file
+  uint32_t tableFileAddress = 0;
+  uint32_t tableFileSize = sizeof(struct LogFSTableFile);
+  for (uint16_t i = 0; i < _header.filesAmount; i++) {
+    uint32_t address = _header.filesStartAddress + i * tableFileSize;
+    if (_fsio->readByte(address)) {
+      _fsio->readBytes(address, (uint8_t*)&tableFile, tableFileSize);
+
+      tableFile.isEmpty = false;
+      strcpy(tableFile.name, name);
+
+      tableFileAddress = address;
+      break;
+    }
+  }
+  if (!tableFileAddress) return NULL;
+
+  // look for free page
+
+
+  _fsio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, tableFileSize);
+
+  LogFSFile *file = new LogFSFile();
+  // fill the file structure
+
+  return file;
 }

@@ -3,6 +3,7 @@
 
 #define LogFS_NAME "LOGFS"
 #define LogFS_VERSION 1
+#define LogGS_FILE_NAME_LENGTH 13
 
 // FS GLOBAL CONFIG LOGFS v1
 uint16_t DEFAULT_PAGE_SIZE = 1024;

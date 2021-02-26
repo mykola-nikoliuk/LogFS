@@ -3,6 +3,7 @@
 
 #include "FSIO.h"
 #include "Header.h"
+#include "File.h"
 #include <stdint.h>
 
 class LogFS {
@@ -21,6 +22,8 @@ class LogFS {
     uint8_t format(uint32_t capacity, uint16_t pageSize);
     uint8_t format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount);
 
+    LogFSFile* createFile(char* name);
+
     LogFSHeader* getHeader() {
       return &_header;
     }
@@ -32,7 +35,9 @@ enum {
   LOGFS_ERR_NOT_FORMATTED,
   LOGFS_ERR_DIFFERENT_VERSION,
   LOGFS_ERR_LOW_SPACE_FILE_TABLE,
-  LOGFS_ERR_LOW_SPACE_PAGES
+  LOGFS_ERR_LOW_SPACE_PAGES,
+
+  LOGFS_ERR_LONG_FILE_NAME
 };
 
 #endif
