@@ -5,11 +5,9 @@
 
 #define SIXTEEN_MB 16 * 1024 * 1024
 
-class MiniSPIFFS : public LogFS {
+struct MiniFSIO : public FSIO {
   public:
     uint8_t data[100];
-
-  private:
     uint32_t writeByte(uint32_t address, uint8_t value) {
       data[address] = value;
       return address + 1;
@@ -24,26 +22,30 @@ void test(const char* name, bool result) {
 }
 
 bool notFormatted() {
-  MiniSPIFFS fs;
+  MiniFSIO fsio;
+  LogFS fs(&fsio);
   return fs.init() == LOGFS_ERR_NOT_FORMATTED;
 }
 
 bool differentVersion() {
-  MiniSPIFFS fs;
-  strcpy((char*)fs.data, "LOGFS");
-  fs.data[5] = 2;
+  MiniFSIO fsio;
+  LogFS fs(&fsio);
+  strcpy((char*)fsio.data, "LOGFS");
+  fsio.data[5] = 2;
   return fs.init() == LOGFS_ERR_DIFFERENT_VERSION;
 }
 
 bool format1() {
-  MiniSPIFFS fs;
+  MiniFSIO fsio;
+  LogFS fs(&fsio);
   fs.format(SIXTEEN_MB);
   return fs.init() == LOGFS_OK;
 }
 
 bool formatPageSize() {
   uint16_t pageSize = 16384;
-  MiniSPIFFS fs;
+  MiniFSIO fsio;
+  LogFS fs(&fsio);
   fs.format(SIXTEEN_MB, pageSize);
   fs.init();
   return fs.pageSize() == pageSize;
@@ -51,7 +53,8 @@ bool formatPageSize() {
 
 bool formatFilesAmount() {
   uint16_t filesAmount = 1024;
-  MiniSPIFFS fs;
+  MiniFSIO fsio;
+  LogFS fs(&fsio);
   fs.format(SIXTEEN_MB, 512, filesAmount);
   fs.init();
   return fs.filesAmount() == filesAmount;

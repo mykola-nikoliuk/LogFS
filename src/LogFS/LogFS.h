@@ -1,6 +1,7 @@
 #ifndef LOGFS_H
 #define LOGFS_H
 
+#include "FSIO.h"
 #include "Header.h"
 #include <stdint.h>
 
@@ -8,19 +9,11 @@ class LogFS {
 
   private:
     LogFSHeader _header;
-
-  protected:
-    virtual uint32_t writeByte(uint32_t address, uint8_t value) = 0;
-    uint32_t writeInt(uint32_t address, uint32_t value);
-    uint32_t writeShort(uint32_t address, uint16_t value);
-    uint32_t writeBytes(uint32_t address, uint8_t* array, uint32_t length);
-
-    virtual uint8_t readByte(uint32_t address) = 0;
-    uint32_t readInt(uint32_t address);
-    uint16_t readShort(uint32_t address);
-    void readBytes(uint32_t address, uint8_t* array, uint32_t length);
+    FSIO* _fsio;
 
   public:
+    LogFS(FSIO* fsio);
+
     uint8_t init();
     void format(uint32_t capacity);
     void format(uint32_t capacity, uint16_t pageSize);
