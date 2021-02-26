@@ -4,11 +4,13 @@
 #include "../LogFS/LogFS.h"
 #include "./format.h"
 
-#define SIXTEEN_MB 16 * 1024 * 1024
+using namespace std;
+
+#define MEMORY_SIZE 1024 * 1024
 
 struct MiniFSIO : public FSIO {
   public:
-    uint8_t data[1024];
+    uint8_t data[MEMORY_SIZE];
     uint32_t writeByte(uint32_t address, uint8_t value) {
       data[address] = value;
       return address + 1;
@@ -19,7 +21,7 @@ struct MiniFSIO : public FSIO {
 };
 
 void test(const char* name, bool result) {
-  std::cout << (result ? "OK    " : "FAILED") << " - " << name << "\n";
+  cout << (result ? "OK    " : "FAILED") << " - " << name << endl;
 }
 
 bool notFormatted() {
@@ -42,7 +44,7 @@ bool formatInit() {
   MiniFSIO fsio;
   LogFS fs(&fsio);
 
-  fs.format(SIXTEEN_MB);
+  fs.format(MEMORY_SIZE);
   return fs.init() == LOGFS_OK;
 }
 
@@ -51,7 +53,7 @@ bool formatPageSize() {
   LogFS fs(&fsio);
 
   uint16_t pageSize = 16384;
-  fs.format(SIXTEEN_MB, pageSize);
+  fs.format(MEMORY_SIZE, pageSize);
   fs.init();
   return fs.getHeader()->pageSize == pageSize;
 }
@@ -61,7 +63,7 @@ bool formatFilesAmount() {
   LogFS fs(&fsio);
 
   uint16_t filesAmount = 1024;
-  fs.format(SIXTEEN_MB, 512, filesAmount);
+  fs.format(MEMORY_SIZE, 512, filesAmount);
   fs.init();
   return fs.getHeader()->filesAmount == filesAmount;
 }
@@ -97,7 +99,7 @@ bool formatOk() {
 }
 
 void testFormat() {
-  std::cout << "Format:\n";
+  cout << "Format:" << endl;
 
   test("not formatted error", notFormatted());
   test("different version", differentVersion());

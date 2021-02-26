@@ -10,6 +10,8 @@ class LogFS {
   private:
     LogFSHeader _header;
     FSIO* _fsio;
+    uint32_t writeEmptyFileTable(uint32_t address, uint16_t filesAmount);
+    void clearPages(uint32_t address, uint16_t pagesAmount);
 
   public:
     LogFS(FSIO* fsio);

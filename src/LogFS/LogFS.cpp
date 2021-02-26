@@ -1,14 +1,37 @@
 #include <string.h>
+#include <math.h>
 #include "./LogFS.h"
 #include "./File.h"
 #include "./Header.h"
 #include "./config.h"
 
-#include <iostream>
-
 LogFS::LogFS(FSIO* fsio) {
   _fsio = fsio;
 }
+
+uint32_t LogFS::writeEmptyFileTable(uint32_t address, uint16_t filesAmount) {
+  uint16_t fileSize = sizeof(struct LogFSFile);
+
+  LogFSFile file;
+  file.isEmpty = true;
+
+  for (uint16_t i = 0; i < filesAmount; i++) {
+    _fsio->writeBytes(address + i * fileSize, (uint8_t*)&file, fileSize);
+  }
+
+  return address + fileSize * filesAmount;
+}
+
+void LogFS::clearPages(uint32_t address, uint16_t pagesAmount) {
+  uint32_t zero = 0;
+  for (uint16_t i = 0; i < pagesAmount; i++) {
+    _fsio->writeInt(
+      address + i * _header.pageSize + _header.pageSize - sizeof(zero),
+      zero
+    );
+  }
+}
+
 
 uint8_t LogFS::init() {
   _fsio->readBytes(0, (uint8_t*)&_header, sizeof(struct LogFSHeader));
@@ -46,15 +69,22 @@ uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmo
   int64_t memoryForPages = capacity - header.pagesMapStartAddress;
 
   // 9th bit to count pagesMap size;
-  int64_t pagesAmount = (uint64_t(memoryForPages) * 8) / (uint64_t(pageSize) * 9);
+  int16_t pagesAmount = (uint64_t(memoryForPages) * 8) / (uint64_t(pageSize) * 9);
   if (pagesAmount == 0) return LOGFS_ERR_LOW_SPACE_PAGES;
 
   header.pagesAmount = pagesAmount;
   header.pagesStartAddress = ceil(pagesAmount / 8.f) + header.pagesMapStartAddress;
 
-
   // start format memory
-  _fsio->writeBytes(0, (uint8_t*)&header, sizeof(struct LogFSHeader));
+  uint32_t address = 0;
+  address = _fsio->writeBytes(address, (uint8_t*)&header, sizeof(struct LogFSHeader));
+  address = writeEmptyFileTable(address, maxFilesAmount);
+  uint8_t zero = 0;
+  for (uint16_t i = 0; i < pagesAmount; i++) {
+    _fsio->writeByte(address + i, zero);
+  }
+  address += pagesAmount;
+
 
   return LOGFS_OK;
 }
