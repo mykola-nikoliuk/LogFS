@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-c -Wall
 LDFLAGS=
-SOURCES=src/main.cpp src/LogFS/LogFS.cpp src/LogFS/Header.cpp src/LogFS/FSIO.cpp
+SOURCES=src/main.cpp src/tests/format.cpp src/LogFS/LogFS.cpp src/LogFS/Header.cpp src/LogFS/FSIO.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=logfs
 
