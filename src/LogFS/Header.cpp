@@ -4,6 +4,8 @@ LogFSHeader::LogFSHeader() {
   pageSize = 0;
   pagesAmount = 0;
   filesAmount = 0;
+  filesStartAddress = 0;
+  pagesStartAddress = 0;
 }
 
 char LogFSHeader::name[] = "LOGFS";

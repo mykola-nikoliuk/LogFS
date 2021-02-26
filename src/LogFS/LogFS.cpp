@@ -31,6 +31,14 @@ uint8_t LogFS::init() {
   return LOGFS_OK;
 }
 
+uint32_t LogFS::writeInt(uint32_t address, uint32_t value) {
+  writeByte(address, value >> 24);
+  writeByte(address + 1, (value >> 16) & 0x00ff);
+  writeByte(address + 2, (value >> 8) & 0x0000ff);
+  writeByte(address + 3, value & 0x000000ff);
+  return address + 4;
+}
+
 uint32_t LogFS::writeShort(uint32_t address, uint16_t value) {
   writeByte(address, value >> 8);
   writeByte(address + 1, value & 0x00ff);
@@ -42,6 +50,14 @@ uint32_t LogFS::writeBytes(uint32_t address, uint8_t* array, uint32_t length) {
     writeByte(address + i, array[i]);
   }
   return address + length;
+}
+
+uint32_t LogFS::readInt(uint32_t address) {
+  return
+    (readByte(address) << 24) +
+    (readByte(address + 1) << 16) +
+    (readByte(address + 1) << 8) +
+    readByte(address + 1);
 }
 
 uint16_t LogFS::readShort(uint32_t address) {

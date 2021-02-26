@@ -15,6 +15,8 @@ struct LogFSHeader {
   uint16_t pageSize;    // min 512, max 32768
   uint16_t pagesAmount;
   uint16_t filesAmount;
+  uint32_t filesStartAddress;
+  uint32_t pagesStartAddress;
 };
 
 #endif
