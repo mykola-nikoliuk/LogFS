@@ -8,15 +8,16 @@
 */
 
 struct LogFSHeader {
-  LogFSHeader();
-
-  static char name[];
-  static uint8_t version;
-  uint16_t pageSize;    // min 512, max 32768
+  char name[6];
+  uint8_t version;
+  uint16_t pageSize;            // 512, 1024, ..., 32768
   uint16_t pagesAmount;
   uint16_t filesAmount;
   uint32_t filesStartAddress;
+  uint32_t pagesMapStartAddress;
   uint32_t pagesStartAddress;
+
+  LogFSHeader();
 };
 
 #endif

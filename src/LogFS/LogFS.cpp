@@ -1,61 +1,60 @@
 #include <string.h>
 #include "./LogFS.h"
+#include "./File.h"
 #include "./Header.h"
 #include "./config.h"
+
+#include <iostream>
 
 LogFS::LogFS(FSIO* fsio) {
   _fsio = fsio;
 }
 
 uint8_t LogFS::init() {
-  uint32_t address = 0;
+  _fsio->readBytes(0, (uint8_t*)&_header, sizeof(struct LogFSHeader));
 
-  uint8_t fsNameLength = strlen(LogFSHeader::name);
-  char fsName[fsNameLength];
-  _fsio->readBytes(address, (uint8_t*)fsName, fsNameLength);
-  address += strlen(LogFSHeader::name);
-
-  if (strcmp(fsName, LogFSHeader::name)) {
+  if (strcmp(_header.name, LogFS_NAME)) {
     return LOGFS_ERR_NOT_FORMATTED;
   }
 
-  if (LogFSHeader::version != _fsio->readByte(address)) {
+  if (_header.version != LogFS_VERSION) {
     return LOGFS_ERR_DIFFERENT_VERSION;
   }
-  address += sizeof(_header.version);
-
-  _header.pageSize = _fsio->readShort(address);
-  address += sizeof(_header.pageSize);
-
-  _header.pagesAmount = _fsio->readShort(address);
-  address += sizeof(_header.pagesAmount);
-
-  _header.filesAmount = _fsio->readShort(address);
 
   return LOGFS_OK;
 }
 
-void LogFS::format(uint32_t capacity) {
-  LogFS::format(capacity, DEFAULT_PAGE_SIZE, DEFAULT_MAX_FILES_AMOUNT);
+uint8_t LogFS::format(uint32_t capacity) {
+  return LogFS::format(capacity, DEFAULT_PAGE_SIZE, DEFAULT_MAX_FILES_AMOUNT);
 }
 
-void LogFS::format(uint32_t capacity, uint16_t pageSize) {
-  LogFS::format(capacity, pageSize, DEFAULT_MAX_FILES_AMOUNT);
+uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize) {
+  return LogFS::format(capacity, pageSize, DEFAULT_MAX_FILES_AMOUNT);
 }
 
-void LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount) {
-  uint32_t pagesAmount = capacity / pageSize;
-  uint16_t maxPageAmountValue = -1;
-
+uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount) {
   LogFSHeader header;
+  strcpy(header.name, LogFS_NAME);
+  header.version = LogFS_VERSION;
   header.pageSize = pageSize;
-  header.pagesAmount = pagesAmount > maxPageAmountValue ? maxPageAmountValue : pagesAmount;
   header.filesAmount = maxFilesAmount;
+  header.filesStartAddress = sizeof(struct LogFSHeader);
 
-  uint32_t address = 0;
-  address = _fsio->writeBytes(address, (uint8_t*)LogFSHeader::name, strlen(LogFSHeader::name));
-  address = _fsio->writeByte(address, header.version);
-  address = _fsio->writeShort(address, header.pageSize);
-  address = _fsio->writeShort(address, header.pagesAmount);
-  address = _fsio->writeShort(address, header.filesAmount);
+  header.pagesMapStartAddress = header.filesStartAddress + sizeof(struct LogFSFile) * uint32_t(maxFilesAmount);
+  if (header.pagesMapStartAddress > capacity) return LOGFS_ERR_LOW_SPACE_FILE_TABLE;
+
+  int64_t memoryForPages = capacity - header.pagesMapStartAddress;
+
+  // 9th bit to count pagesMap size;
+  int64_t pagesAmount = (uint64_t(memoryForPages) * 8) / (uint64_t(pageSize) * 9);
+  if (pagesAmount == 0) return LOGFS_ERR_LOW_SPACE_PAGES;
+
+  header.pagesAmount = pagesAmount;
+  header.pagesStartAddress = ceil(pagesAmount / 8.f) + header.pagesMapStartAddress;
+
+
+  // start format memory
+  _fsio->writeBytes(0, (uint8_t*)&header, sizeof(struct LogFSHeader));
+
+  return LOGFS_OK;
 }

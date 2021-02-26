@@ -15,18 +15,12 @@ class LogFS {
     LogFS(FSIO* fsio);
 
     uint8_t init();
-    void format(uint32_t capacity);
-    void format(uint32_t capacity, uint16_t pageSize);
-    void format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount);
+    uint8_t format(uint32_t capacity);
+    uint8_t format(uint32_t capacity, uint16_t pageSize);
+    uint8_t format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount);
 
-    uint16_t pageSize() {
-      return _header.pageSize;
-    }
-    uint16_t pagesAmount() {
-      return _header.pagesAmount;
-    }
-    uint16_t filesAmount() {
-      return _header.filesAmount;
+    LogFSHeader* getHeader() {
+      return &_header;
     }
 };
 
@@ -34,7 +28,9 @@ class LogFS {
 enum {
   LOGFS_OK = 0,
   LOGFS_ERR_NOT_FORMATTED,
-  LOGFS_ERR_DIFFERENT_VERSION
+  LOGFS_ERR_DIFFERENT_VERSION,
+  LOGFS_ERR_LOW_SPACE_FILE_TABLE,
+  LOGFS_ERR_LOW_SPACE_PAGES
 };
 
 #endif
