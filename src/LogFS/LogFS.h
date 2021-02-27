@@ -25,6 +25,7 @@ class LogFS {
 
     LogFSFile* createFile(char* name);
     LogFSFile* openFile(char* name);
+    uint8_t deleteFile(char* name);
 
     LogFSHeader* getHeader() {
       return &_header;
@@ -39,7 +40,8 @@ enum {
   LOGFS_ERR_LOW_SPACE_FILE_TABLE,
   LOGFS_ERR_LOW_SPACE_PAGES,
 
-  LOGFS_ERR_LONG_FILE_NAME
+  LOGFS_ERR_LONG_FILE_NAME,
+  LOGFS_ERR_FILE_NOT_FOUND
 };
 
 #endif

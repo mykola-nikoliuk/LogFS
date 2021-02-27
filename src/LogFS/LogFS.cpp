@@ -177,3 +177,31 @@ LogFSFile* LogFS::openFile(char* name) {
 
   return file;
 }
+
+
+uint8_t LogFS::deleteFile(char* name) {
+  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LOGFS_ERR_LONG_FILE_NAME;
+
+  LogFSTableFile tableFile;
+
+  // look for free table file
+  uint32_t tableFileAddress = 0;
+  uint32_t tableFileSize = sizeof(struct LogFSTableFile);
+  for (uint16_t i = 0; i < _header.filesAmount; i++) {
+    uint32_t address = _header.filesStartAddress + i * tableFileSize;
+    if (!_fsio->readByte(address)) {
+      _fsio->readBytes(address, (uint8_t*)&tableFile, tableFileSize);
+
+      if (strcmp(tableFile.name, name) == 0) {
+        tableFileAddress = address;
+        break;
+      }
+    }
+  }
+  if (!tableFileAddress) return LOGFS_ERR_FILE_NOT_FOUND;
+
+  tableFile.isEmpty = true;
+  _fsio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, tableFileSize);
+
+  return LOGFS_OK;
+}

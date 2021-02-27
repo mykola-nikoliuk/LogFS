@@ -7,6 +7,8 @@
 
 using namespace std;
 
+char defaultName[] = "file.txt";
+
 LogFS* createFS(uint16_t filesAmount) {
   MiniFSIO fsio;
   LogFS *fs = new LogFS(&fsio);
@@ -33,11 +35,10 @@ bool createLongNameFile() {
 
 bool reachMaxFilesLimit() {
   LogFS *fs = createFS(2);
-  char name[] = "1.txt";
-  delete fs->createFile(name);
-  delete fs->createFile(name);
+  delete fs->createFile(defaultName);
+  delete fs->createFile(defaultName);
 
-  bool result = fs->createFile(name) == NULL;
+  bool result = fs->createFile(defaultName) == NULL;
 
   delete fs;
   return result;
@@ -46,9 +47,8 @@ bool reachMaxFilesLimit() {
 
 bool openFileNotExist() {
   LogFS *fs = createFS(2);
-  char name[] = "notexist.txt";
 
-  bool result = fs->openFile(name) == NULL;
+  bool result = fs->openFile(defaultName) == NULL;
 
   delete fs;
   return result;
@@ -56,10 +56,53 @@ bool openFileNotExist() {
 
 bool createAndOpenFile() {
   LogFS *fs = createFS(2);
-  char name[] = "file.txt";
 
-  delete fs->createFile(name);
-  bool result = fs->openFile(name);
+  delete fs->createFile(defaultName);
+  LogFSFile* file = fs->openFile(defaultName);
+
+  bool result = file;
+
+  delete file;
+  delete fs;
+  return result;
+}
+
+bool createAndDeleteFile() {
+  LogFS *fs = createFS(2);
+
+  delete fs->createFile(defaultName);
+  bool result = fs->deleteFile(defaultName) == LOGFS_OK;
+
+  delete fs;
+  return result;
+}
+
+bool deleteFileNotExist() {
+  LogFS *fs = createFS(2);
+
+  bool result = fs->deleteFile(defaultName) == LOGFS_ERR_FILE_NOT_FOUND;
+
+  delete fs;
+  return result;
+}
+
+bool deleteLongNameFile() {
+  LogFS *fs = createFS(2);
+  char name[] = "12345678901234567890.txt";
+
+  bool result = fs->deleteFile(name) == LOGFS_ERR_LONG_FILE_NAME;
+
+  delete fs;
+  return result;
+}
+
+bool openDeletedFile() {
+  LogFS *fs = createFS(2);
+
+  delete fs->createFile(defaultName);
+  fs->deleteFile(defaultName);
+
+  bool result = fs->openFile(defaultName) == NULL;
 
   delete fs;
   return result;
@@ -72,4 +115,8 @@ void testFile() {
   test("reach max files limit", reachMaxFilesLimit());
   test("open file not exist", openFileNotExist());
   test("create and open", createAndOpenFile());
+  test("create and delete file", createAndDeleteFile());
+  test("delete file not exist", deleteFileNotExist());
+  test("delete long name file", deleteLongNameFile());
+  test("open deleted file", openDeletedFile());
 }
