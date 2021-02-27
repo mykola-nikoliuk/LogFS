@@ -9,127 +9,104 @@ using namespace std;
 
 char defaultName[] = "file.txt";
 
-LogFS* createFS(uint16_t filesAmount) {
-  MiniFSIO fsio;
-  LogFS *fs = new LogFS(&fsio);
-
+void initFS(LogFSRAM* fs, uint16_t filesAmount) {
   fs->format(MEMORY_SIZE, 512, filesAmount);
   fs->init();
-  return fs;
 }
 
-LogFS* createFS() {
-  return createFS(64);
+void initFS(LogFSRAM* fs) {
+  return initFS(fs, 64);
 }
 
+// --- TESTS ---
 
 bool createLongNameFile() {
-  LogFS *fs = createFS();
+  LogFSRAM fs;
+  initFS(&fs);
   char name[] = "12345678901234567890.txt";
 
   LogFSFile file;
-  bool result = fs->createFile(name, &file) == LOGFS_ERR_LONG_FILE_NAME;
-
-  delete fs;
-  return result;
+  return fs.createFile(name, &file) == LOGFS_ERR_LONG_FILE_NAME;
 }
 
 bool reachMaxFilesLimit() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs, 2);
   LogFSFile file;
 
-  fs->createFile(defaultName, &file);
-  fs->createFile(defaultName, &file);
+  fs.createFile(defaultName, &file);
+  fs.createFile(defaultName, &file);
 
-  bool result = fs->createFile(defaultName, &file) == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
-
-  delete fs;
-  return result;
+  return fs.createFile(defaultName, &file) == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 }
 
 bool openFileNotExist() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
   LogFSFile file;
 
-  bool result = fs->openFile(defaultName, &file) == LOGFS_ERR_FILE_NOT_FOUND;
-
-  delete fs;
-  return result;
+  return fs.openFile(defaultName, &file) == LOGFS_ERR_FILE_NOT_FOUND;
 }
 
 bool createAndOpenFile() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
   LogFSFile file;
 
-  fs->createFile(defaultName, &file);
+  fs.createFile(defaultName, &file);
 
-  bool result = fs->openFile(defaultName, &file) == LOGFS_OK;
-
-  delete fs;
-  return result;
+  return fs.openFile(defaultName, &file) == LOGFS_OK;
 }
 
 bool createAndDeleteFile() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
   LogFSFile file;
 
-  fs->createFile(defaultName, &file);
-  bool result = fs->deleteFile(defaultName) == LOGFS_OK;
-
-  delete fs;
-  return result;
+  fs.createFile(defaultName, &file);
+  return fs.deleteFile(defaultName) == LOGFS_OK;
 }
 
 bool deleteFileNotExist() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
 
-  bool result = fs->deleteFile(defaultName) == LOGFS_ERR_FILE_NOT_FOUND;
-
-  delete fs;
-  return result;
+  return fs.deleteFile(defaultName) == LOGFS_ERR_FILE_NOT_FOUND;
 }
 
 bool deleteLongNameFile() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
   char name[] = "12345678901234567890.txt";
 
-  bool result = fs->deleteFile(name) == LOGFS_ERR_LONG_FILE_NAME;
-
-  delete fs;
-  return result;
+  return fs.deleteFile(name) == LOGFS_ERR_LONG_FILE_NAME;
 }
 
 bool openDeletedFile() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
   LogFSFile file;
 
-  fs->createFile(defaultName, &file);
-  fs->deleteFile(defaultName);
+  fs.createFile(defaultName, &file);
+  fs.deleteFile(defaultName);
 
-  bool result = fs->openFile(defaultName, &file) == LOGFS_OK;
-
-  delete fs;
-  return result;
+  return fs.openFile(defaultName, &file) == LOGFS_ERR_FILE_NOT_FOUND;
 }
 
 bool fileNotExist() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
 
-  bool result = !fs->exist(defaultName);
-
-  delete fs;
-  return result;
+  return !fs.exist(defaultName);
 }
 
 bool fileExist() {
-  LogFS *fs = createFS(2);
+  LogFSRAM fs;
+  initFS(&fs);
   LogFSFile file;
 
-  fs->createFile(defaultName, &file);
-  bool result = fs->exist(defaultName);
-
-  delete fs;
-  return result;
+  fs.createFile(defaultName, &file);
+  return fs.exist(defaultName);
 }
 
 void testFile() {

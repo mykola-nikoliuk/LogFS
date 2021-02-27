@@ -10,32 +10,28 @@ using namespace std;
 #define MEMORY_SIZE 1024 * 1024
 
 bool notFormatted() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
   return fs.init() == LOGFS_ERR_NOT_FORMATTED;
 }
 
 bool differentVersion() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
-  strcpy((char*)fsio.data, "LOGFS");
-  fsio.data[6] = 2;
+  strcpy((char*)fs.fsio.data, "LOGFS");
+  fs.fsio.data[6] = 2;
   return fs.init() == LOGFS_ERR_DIFFERENT_VERSION;
 }
 
 bool formatInit() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
   fs.format(MEMORY_SIZE);
   return fs.init() == LOGFS_OK;
 }
 
 bool formatPageSize() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
   uint16_t pageSize = 16384;
   fs.format(MEMORY_SIZE, pageSize);
@@ -44,8 +40,7 @@ bool formatPageSize() {
 }
 
 bool formatFilesAmount() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
   uint16_t filesAmount = 1024;
   fs.format(MEMORY_SIZE, 512, filesAmount);
@@ -54,8 +49,7 @@ bool formatFilesAmount() {
 }
 
 bool formatLowSpaceFileTable() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
   uint16_t filesAmount = 32;
   uint16_t pageSize = 512;
@@ -64,8 +58,7 @@ bool formatLowSpaceFileTable() {
 }
 
 bool formatLowSpacePages() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
   uint16_t filesAmount = 8;
   uint16_t pageSize = 1024;
@@ -74,8 +67,7 @@ bool formatLowSpacePages() {
 }
 
 bool formatOk() {
-  MiniFSIO fsio;
-  LogFS fs(&fsio);
+  LogFSRAM fs;
 
   uint16_t filesAmount = 1;
   uint16_t pageSize = 512;

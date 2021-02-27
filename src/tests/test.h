@@ -6,7 +6,7 @@
 
 #define MEMORY_SIZE 1024 * 1024
 
-struct MiniFSIO : public FSIO {
+struct RAMFSIO : public FSIO {
   public:
     uint8_t data[MEMORY_SIZE];
     uint32_t writeByte(uint32_t address, uint8_t value) {
@@ -16,6 +16,12 @@ struct MiniFSIO : public FSIO {
     uint8_t readByte(uint32_t address) {
       return data[address];
     }
+};
+
+class LogFSRAM : public LogFS {
+  public:
+      RAMFSIO fsio;
+      LogFSRAM() : LogFS(&fsio) {};
 };
 
 void test(const char* name, bool result);
