@@ -25,8 +25,8 @@ class LogFS {
     uint8_t format(uint32_t capacity, uint16_t pageSize);
     uint8_t format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount);
 
-    LogFSFile* createFile(char* name);
-    LogFSFile* openFile(char* name);
+    uint8_t createFile(char* name, LogFSFile* file);
+    uint8_t openFile(char* name, LogFSFile* file);
     uint8_t deleteFile(char* name);
     bool exist(char* name);
 

@@ -27,7 +27,8 @@ bool createLongNameFile() {
   LogFS *fs = createFS();
   char name[] = "12345678901234567890.txt";
 
-  bool result = fs->createFile(name) == NULL;
+  LogFSFile file;
+  bool result = fs->createFile(name, &file) == LOGFS_ERR_LONG_FILE_NAME;
 
   delete fs;
   return result;
@@ -35,20 +36,22 @@ bool createLongNameFile() {
 
 bool reachMaxFilesLimit() {
   LogFS *fs = createFS(2);
-  delete fs->createFile(defaultName);
-  delete fs->createFile(defaultName);
+  LogFSFile file;
 
-  bool result = fs->createFile(defaultName) == NULL;
+  fs->createFile(defaultName, &file);
+  fs->createFile(defaultName, &file);
+
+  bool result = fs->createFile(defaultName, &file) == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 
   delete fs;
   return result;
-
 }
 
 bool openFileNotExist() {
   LogFS *fs = createFS(2);
+  LogFSFile file;
 
-  bool result = fs->openFile(defaultName) == NULL;
+  bool result = fs->openFile(defaultName, &file) == LOGFS_ERR_FILE_NOT_FOUND;
 
   delete fs;
   return result;
@@ -56,21 +59,21 @@ bool openFileNotExist() {
 
 bool createAndOpenFile() {
   LogFS *fs = createFS(2);
+  LogFSFile file;
 
-  delete fs->createFile(defaultName);
-  LogFSFile* file = fs->openFile(defaultName);
+  fs->createFile(defaultName, &file);
 
-  bool result = file;
+  bool result = fs->openFile(defaultName, &file) == LOGFS_OK;
 
-  delete file;
   delete fs;
   return result;
 }
 
 bool createAndDeleteFile() {
   LogFS *fs = createFS(2);
+  LogFSFile file;
 
-  delete fs->createFile(defaultName);
+  fs->createFile(defaultName, &file);
   bool result = fs->deleteFile(defaultName) == LOGFS_OK;
 
   delete fs;
@@ -98,11 +101,12 @@ bool deleteLongNameFile() {
 
 bool openDeletedFile() {
   LogFS *fs = createFS(2);
+  LogFSFile file;
 
-  delete fs->createFile(defaultName);
+  fs->createFile(defaultName, &file);
   fs->deleteFile(defaultName);
 
-  bool result = fs->openFile(defaultName) == NULL;
+  bool result = fs->openFile(defaultName, &file) == LOGFS_OK;
 
   delete fs;
   return result;
@@ -119,8 +123,9 @@ bool fileNotExist() {
 
 bool fileExist() {
   LogFS *fs = createFS(2);
+  LogFSFile file;
 
-  delete fs->createFile(defaultName);
+  fs->createFile(defaultName, &file);
   bool result = fs->exist(defaultName);
 
   delete fs;
