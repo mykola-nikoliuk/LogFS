@@ -24,6 +24,7 @@ class LogFS {
     uint8_t format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount);
 
     LogFSFile* createFile(char* name);
+    LogFSFile* openFile(char* name);
 
     LogFSHeader* getHeader() {
       return &_header;

@@ -24,7 +24,11 @@ LogFS* createFS() {
 bool createLongNameFile() {
   LogFS *fs = createFS();
   char name[] = "12345678901234567890.txt";
-  return fs->createFile(name) == NULL;
+
+  bool result = fs->createFile(name) == NULL;
+
+  delete fs;
+  return result;
 }
 
 bool reachMaxFilesLimit() {
@@ -32,7 +36,33 @@ bool reachMaxFilesLimit() {
   char name[] = "1.txt";
   delete fs->createFile(name);
   delete fs->createFile(name);
-  return fs->createFile(name) == NULL;
+
+  bool result = fs->createFile(name) == NULL;
+
+  delete fs;
+  return result;
+
+}
+
+bool openFileNotExist() {
+  LogFS *fs = createFS(2);
+  char name[] = "notexist.txt";
+
+  bool result = fs->openFile(name) == NULL;
+
+  delete fs;
+  return result;
+}
+
+bool createAndOpenFile() {
+  LogFS *fs = createFS(2);
+  char name[] = "file.txt";
+
+  delete fs->createFile(name);
+  bool result = fs->openFile(name);
+
+  delete fs;
+  return result;
 }
 
 void testFile() {
@@ -40,4 +70,6 @@ void testFile() {
 
   test("create long name file", createLongNameFile());
   test("reach max files limit", reachMaxFilesLimit());
+  test("open file not exist", openFileNotExist());
+  test("create and open", createAndOpenFile());
 }
