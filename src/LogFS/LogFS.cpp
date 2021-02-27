@@ -1,8 +1,8 @@
 #include <string.h>
 #include <math.h>
 #include "./LogFS.h"
-#include "./TableFile.h"
-#include "./Header.h"
+#include "./TableFile.h" // ??
+#include "./Header.h" // ??
 #include "./config.h"
 
 LogFS::LogFS(FSIO* fsio) {
@@ -55,6 +55,26 @@ int32_t LogFS::allocatePage() {
   return -1;
 }
 
+uint32_t LogFS::fillTableFile(char* name, LogFSTableFile* tableFile) {
+  uint32_t tableFileAddress = 0;
+  uint32_t tableFileSize = sizeof(struct LogFSTableFile);
+
+  for (uint16_t i = 0; i < _header.filesAmount; i++) {
+    uint32_t address = _header.filesStartAddress + i * tableFileSize;
+    if (!_fsio->readByte(address)) {
+      _fsio->readBytes(address, (uint8_t*)tableFile, tableFileSize);
+
+      if (strcmp(tableFile->name, name) == 0) {
+        tableFileAddress = address;
+        break;
+      }
+    }
+  }
+
+  return tableFileAddress;
+}
+
+// --- PUBLIC ---
 
 uint8_t LogFS::init() {
   _fsio->readBytes(0, (uint8_t*)&_header, sizeof(struct LogFSHeader));
@@ -156,20 +176,8 @@ LogFSFile* LogFS::openFile(char* name) {
 
   LogFSTableFile tableFile;
 
-  // look for free table file
-  uint32_t tableFileAddress = 0;
-  uint32_t tableFileSize = sizeof(struct LogFSTableFile);
-  for (uint16_t i = 0; i < _header.filesAmount; i++) {
-    uint32_t address = _header.filesStartAddress + i * tableFileSize;
-    if (!_fsio->readByte(address)) {
-      _fsio->readBytes(address, (uint8_t*)&tableFile, tableFileSize);
-
-      if (strcmp(tableFile.name, name) == 0) {
-        tableFileAddress = address;
-        break;
-      }
-    }
-  }
+  // look for table file
+  uint32_t tableFileAddress = fillTableFile(name, &tableFile);
   if (!tableFileAddress) return NULL;
 
   LogFSFile *file = new LogFSFile();
@@ -178,30 +186,27 @@ LogFSFile* LogFS::openFile(char* name) {
   return file;
 }
 
-
 uint8_t LogFS::deleteFile(char* name) {
   if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LOGFS_ERR_LONG_FILE_NAME;
 
   LogFSTableFile tableFile;
 
-  // look for free table file
-  uint32_t tableFileAddress = 0;
-  uint32_t tableFileSize = sizeof(struct LogFSTableFile);
-  for (uint16_t i = 0; i < _header.filesAmount; i++) {
-    uint32_t address = _header.filesStartAddress + i * tableFileSize;
-    if (!_fsio->readByte(address)) {
-      _fsio->readBytes(address, (uint8_t*)&tableFile, tableFileSize);
-
-      if (strcmp(tableFile.name, name) == 0) {
-        tableFileAddress = address;
-        break;
-      }
-    }
-  }
+  // look for table file
+  uint32_t tableFileAddress = fillTableFile(name, &tableFile);
   if (!tableFileAddress) return LOGFS_ERR_FILE_NOT_FOUND;
 
   tableFile.isEmpty = true;
-  _fsio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, tableFileSize);
+  _fsio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, sizeof(struct LogFSTableFile));
 
   return LOGFS_OK;
+}
+
+bool LogFS::exist(char* name) {
+  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return false;
+
+  LogFSTableFile tableFile;
+  // look for table file
+  if(!fillTableFile(name, &tableFile)) return false;
+
+  return true;
 }

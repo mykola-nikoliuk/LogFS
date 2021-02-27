@@ -108,6 +108,25 @@ bool openDeletedFile() {
   return result;
 }
 
+bool fileNotExist() {
+  LogFS *fs = createFS(2);
+
+  bool result = !fs->exist(defaultName);
+
+  delete fs;
+  return result;
+}
+
+bool fileExist() {
+  LogFS *fs = createFS(2);
+
+  delete fs->createFile(defaultName);
+  bool result = fs->exist(defaultName);
+
+  delete fs;
+  return result;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -119,4 +138,6 @@ void testFile() {
   test("delete file not exist", deleteFileNotExist());
   test("delete long name file", deleteLongNameFile());
   test("open deleted file", openDeletedFile());
+  test("file not exist", fileNotExist());
+  test("file exist", fileExist());
 }
