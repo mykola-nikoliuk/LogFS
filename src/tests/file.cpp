@@ -7,6 +7,8 @@
 
 using namespace std;
 
+#define PAGE_SIZE 512
+
 char defaultName[] = "file.txt";
 char secondFileName[] = "file2.txt";
 char longName[] = "12345678901234567890.txt";
@@ -15,15 +17,21 @@ char secondLogs[] = "another logs line";
 
 class LogFSRAMTest : public LogFSRAM {
   public:
+    LogFSRAMTest(uint16_t filesAmount, uint16_t pageSize, uint32_t memorySize) : LogFSRAM() {
+      formatAndInit(filesAmount, pageSize, memorySize);
+    }
+    LogFSRAMTest(uint16_t filesAmount, uint16_t pageSize) : LogFSRAM() {
+      formatAndInit(filesAmount, pageSize, MEMORY_SIZE);
+    }
     LogFSRAMTest(uint16_t filesAmount) : LogFSRAM() {
-      formatAndInit(filesAmount);
+      formatAndInit(filesAmount, PAGE_SIZE, MEMORY_SIZE);
     }
     LogFSRAMTest() : LogFSRAM() {
-      formatAndInit(64);
+      formatAndInit(64, PAGE_SIZE, MEMORY_SIZE);
     }
 
-    void formatAndInit(uint8_t filesAmount) {
-      format(MEMORY_SIZE, 512, filesAmount);
+    void formatAndInit(uint8_t filesAmount, uint16_t pageSize, uint32_t memorySize) {
+      format(memorySize, pageSize, filesAmount);
       init();
     }
 };
@@ -149,6 +157,21 @@ bool readTwoFile() {
   return strcmp(buffer1, defaultLogs) == 0 && strcmp(buffer2, secondLogs) == 0;
 }
 
+bool writeAndReadMoreThanPageSize() {
+  LogFSRAMTest fs(2, 8, 1024);
+
+  char log[] = "log that longer then page size";
+  uint16_t logSize = strlen(log) + 1;
+
+  LogFSFile file = fs.createFile(defaultName);
+  file.write((uint8_t*)log, logSize);
+
+  char buffer[logSize];
+  file.read((uint8_t*)buffer, logSize);
+
+  return strcmp(buffer, log) == 0;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -166,4 +189,5 @@ void testFile() {
   test("file not opened", fileNotOpened());
   test("write and read file", readFile());
   test("write and read two files", readTwoFile());
+  test("write and read more than page size", writeAndReadMoreThanPageSize());
 }
