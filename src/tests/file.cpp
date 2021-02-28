@@ -11,27 +11,31 @@ char defaultName[] = "file.txt";
 char longName[] = "12345678901234567890.txt";
 char defaultLogs[] = "some logs";
 
-void initFS(LogFSRAM* fs, uint16_t filesAmount) {
-  fs->format(MEMORY_SIZE, 512, filesAmount);
-  fs->init();
-}
+class LogFSRAMTest : public LogFSRAM {
+  public:
+    LogFSRAMTest(uint16_t filesAmount) : LogFSRAM() {
+      formatAndInit(filesAmount);
+    }
+    LogFSRAMTest() : LogFSRAM() {
+      formatAndInit(64);
+    }
 
-void initFS(LogFSRAM* fs) {
-  return initFS(fs, 64);
-}
+    void formatAndInit(uint8_t filesAmount) {
+      format(MEMORY_SIZE, 512, filesAmount);
+      init();
+    }
+};
 
 // --- TESTS ---
 
 bool createLongNameFile() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   return fs.createFile(longName).getStatus() == LOGFS_ERR_LONG_FILE_NAME;
 }
 
 bool reachMaxFilesLimit() {
-  LogFSRAM fs;
-  initFS(&fs, 2);
+  LogFSRAMTest fs(2);
 
   fs.createFile(defaultName);
   fs.createFile(defaultName);
@@ -40,45 +44,39 @@ bool reachMaxFilesLimit() {
 }
 
 bool openFileNotExist() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   return fs.openFile(defaultName).getStatus() == LOGFS_ERR_FILE_NOT_FOUND;
 }
 
 bool createAndOpenFile() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   fs.createFile(defaultName);
   return fs.openFile(defaultName).getStatus() == LOGFS_OK;
 }
 
 bool createAndDeleteFile() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   fs.createFile(defaultName);
   return fs.deleteFile(defaultName) == LOGFS_OK;
 }
 
 bool deleteFileNotExist() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   return fs.deleteFile(defaultName) == LOGFS_ERR_FILE_NOT_FOUND;
 }
 
 bool deleteLongNameFile() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   return fs.deleteFile(longName) == LOGFS_ERR_LONG_FILE_NAME;
 }
 
 bool openDeletedFile() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   fs.createFile(defaultName);
   fs.deleteFile(defaultName);
@@ -87,23 +85,20 @@ bool openDeletedFile() {
 }
 
 bool fileNotExist() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   return !fs.exist(defaultName);
 }
 
 bool fileExist() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   fs.createFile(defaultName);
   return fs.exist(defaultName);
 }
 
 bool writeFile() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   LogFSFile file = fs.createFile(defaultName);
   file.writeBytes((uint8_t*)defaultLogs, strlen(defaultLogs));
@@ -114,8 +109,7 @@ bool writeFile() {
 }
 
 bool fileNotOpened() {
-  LogFSRAM fs;
-  initFS(&fs);
+  LogFSRAMTest fs;
 
   LogFSFile file = fs.createFile(longName);
 
