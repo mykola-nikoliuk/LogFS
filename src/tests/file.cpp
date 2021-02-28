@@ -8,6 +8,7 @@
 using namespace std;
 
 char defaultName[] = "file.txt";
+char longName[] = "12345678901234567890.txt";
 char defaultLogs[] = "some logs";
 
 void initFS(LogFSRAM* fs, uint16_t filesAmount) {
@@ -24,9 +25,8 @@ void initFS(LogFSRAM* fs) {
 bool createLongNameFile() {
   LogFSRAM fs;
   initFS(&fs);
-  char name[] = "12345678901234567890.txt";
 
-  return fs.createFile(name).getStatus() == LOGFS_ERR_LONG_FILE_NAME;
+  return fs.createFile(longName).getStatus() == LOGFS_ERR_LONG_FILE_NAME;
 }
 
 bool reachMaxFilesLimit() {
@@ -72,9 +72,8 @@ bool deleteFileNotExist() {
 bool deleteLongNameFile() {
   LogFSRAM fs;
   initFS(&fs);
-  char name[] = "12345678901234567890.txt";
 
-  return fs.deleteFile(name) == LOGFS_ERR_LONG_FILE_NAME;
+  return fs.deleteFile(longName) == LOGFS_ERR_LONG_FILE_NAME;
 }
 
 bool openDeletedFile() {
@@ -111,11 +110,16 @@ bool writeFile() {
 
   char* pagesStart = (char*)&fs.fsio.data + fs.getHeader()->pagesStartAddress;
 
-  cout << defaultLogs << endl;
+  return strcmp(pagesStart, defaultLogs) == 0;
+}
 
-//  return strcmp(pagesStart, defaultLogs) == 0;
-  // finish test
-  return true;
+bool fileNotOpened() {
+  LogFSRAM fs;
+  initFS(&fs);
+
+  LogFSFile file = fs.createFile(longName);
+
+  return file.writeBytes((uint8_t*)defaultLogs, strlen(defaultLogs)) == LOGFS_ERR_FILE_NOT_OPENED;
 }
 
 void testFile() {
@@ -131,6 +135,6 @@ void testFile() {
   test("open deleted file", openDeletedFile());
   test("file not exist", fileNotExist());
   test("file exist", fileExist());
-
   test("write file", writeFile());
+  test("file not opened", fileNotOpened());
 }

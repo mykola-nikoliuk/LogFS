@@ -16,6 +16,7 @@ class LogFS {
     void clearPages(uint32_t address, uint16_t pagesAmount);
     int32_t allocatePage();
     uint32_t fillTableFile(char* name, LogFSTableFile* tableFile);
+    uint32_t getPageAddress(uint16_t pageIndex);
     friend class LogFSFile;
 
   public:

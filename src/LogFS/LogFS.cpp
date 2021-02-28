@@ -74,6 +74,10 @@ uint32_t LogFS::fillTableFile(char* name, LogFSTableFile* tableFile) {
   return tableFileAddress;
 }
 
+uint32_t LogFS::getPageAddress(uint16_t pageIndex) {
+  return _header.pagesStartAddress + _header.pageSize * pageIndex;
+}
+
 // --- PUBLIC ---
 
 uint8_t LogFS::init() {
@@ -162,12 +166,13 @@ LogFSFile LogFS::createFile(char* name) {
 
   // save table file
   tableFile.firstPageIndex = pageIndex;
+  tableFile.lastPageIndex = pageIndex;
   tableFile.lastPageOffset = 0;
   _fsio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, tableFileSize);
 
   // fill the file structure
 
-  return LogFSFile(this);
+  return LogFSFile(this, &tableFile);
 }
 
 LogFSFile LogFS::openFile(char* name) {
@@ -181,7 +186,7 @@ LogFSFile LogFS::openFile(char* name) {
 
   // fill the file structure
 
-  return LogFSFile(this);
+  return LogFSFile(this, &tableFile);
 }
 
 uint8_t LogFS::deleteFile(char* name) {
