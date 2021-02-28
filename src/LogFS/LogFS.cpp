@@ -134,8 +134,8 @@ uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmo
   return LOGFS_OK;
 }
 
-uint8_t LogFS::createFile(char* name, LogFSFile* file) {
-  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LOGFS_ERR_LONG_FILE_NAME;
+LogFSFile LogFS::createFile(char* name) {
+  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LogFSFile(LOGFS_ERR_LONG_FILE_NAME);
 
   LogFSTableFile tableFile;
 
@@ -154,11 +154,11 @@ uint8_t LogFS::createFile(char* name, LogFSFile* file) {
       break;
     }
   }
-  if (!tableFileAddress) return LOGFS_ERR_LOW_SPACE_FILE_TABLE;
+  if (!tableFileAddress) return LogFSFile(LOGFS_ERR_LOW_SPACE_FILE_TABLE);
 
   // look for free page
   uint16_t pageIndex = allocatePage();
-  if (pageIndex < 0) return LOGFS_ERR_LOW_SPACE_PAGES;
+  if (pageIndex < 0) return LogFSFile(LOGFS_ERR_LOW_SPACE_PAGES);
 
   // save table file
   tableFile.firstPageIndex = pageIndex;
@@ -167,21 +167,21 @@ uint8_t LogFS::createFile(char* name, LogFSFile* file) {
 
   // fill the file structure
 
-  return LOGFS_OK;
+  return LogFSFile(this);
 }
 
-uint8_t LogFS::openFile(char* name, LogFSFile* file) {
-  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LOGFS_ERR_LONG_FILE_NAME;
+LogFSFile LogFS::openFile(char* name) {
+  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LogFSFile(LOGFS_ERR_LONG_FILE_NAME);
 
   LogFSTableFile tableFile;
 
   // look for table file
   uint32_t tableFileAddress = fillTableFile(name, &tableFile);
-  if (!tableFileAddress) return LOGFS_ERR_FILE_NOT_FOUND;
+  if (!tableFileAddress) return LogFSFile(LOGFS_ERR_FILE_NOT_FOUND);
 
   // fill the file structure
 
-  return LOGFS_OK;
+  return LogFSFile(this);
 }
 
 uint8_t LogFS::deleteFile(char* name) {

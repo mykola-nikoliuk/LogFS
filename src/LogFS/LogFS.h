@@ -16,6 +16,7 @@ class LogFS {
     void clearPages(uint32_t address, uint16_t pagesAmount);
     int32_t allocatePage();
     uint32_t fillTableFile(char* name, LogFSTableFile* tableFile);
+    friend class LogFSFile;
 
   public:
     LogFS(FSIO* fsio);
@@ -25,14 +26,12 @@ class LogFS {
     uint8_t format(uint32_t capacity, uint16_t pageSize);
     uint8_t format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount);
 
-    uint8_t createFile(char* name, LogFSFile* file);
-    uint8_t openFile(char* name, LogFSFile* file);
+    LogFSFile createFile(char* name);
+    LogFSFile openFile(char* name);
     uint8_t deleteFile(char* name);
     bool exist(char* name);
 
-    LogFSHeader* getHeader() {
-      return &_header;
-    }
+    LogFSHeader* getHeader() { return &_header; }
 };
 
 #endif

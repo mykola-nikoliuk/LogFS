@@ -3,15 +3,24 @@
 
 #include <stdint.h>
 #include "FSIO.h"
+#include "config.h"
 
-struct LogFSFile {
+class LogFS;
+
+class LogFSFile {
   private:
-    FSIO* _fsio;
+    LogFS* _fs;
+    uint8_t _status;
 
   public:
-    LogFSFile() {
-      _fsio = 0;
+    LogFSFile(LogFS* fs) {
+      _fs = fs;
+      _status = LOGFS_OK;
     }
+    LogFSFile(uint8_t status) {
+      _status = status;
+    }
+    uint8_t getStatus() { return _status; }
     uint8_t writeBytes(uint8_t* data, uint32_t length);
 };
 

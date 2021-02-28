@@ -26,45 +26,39 @@ bool createLongNameFile() {
   initFS(&fs);
   char name[] = "12345678901234567890.txt";
 
-  LogFSFile file;
-  return fs.createFile(name, &file) == LOGFS_ERR_LONG_FILE_NAME;
+  return fs.createFile(name).getStatus() == LOGFS_ERR_LONG_FILE_NAME;
 }
 
 bool reachMaxFilesLimit() {
   LogFSRAM fs;
   initFS(&fs, 2);
-  LogFSFile file;
 
-  fs.createFile(defaultName, &file);
-  fs.createFile(defaultName, &file);
+  fs.createFile(defaultName);
+  fs.createFile(defaultName);
 
-  return fs.createFile(defaultName, &file) == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
+  return fs.createFile(defaultName).getStatus() == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 }
 
 bool openFileNotExist() {
   LogFSRAM fs;
   initFS(&fs);
-  LogFSFile file;
 
-  return fs.openFile(defaultName, &file) == LOGFS_ERR_FILE_NOT_FOUND;
+  return fs.openFile(defaultName).getStatus() == LOGFS_ERR_FILE_NOT_FOUND;
 }
 
 bool createAndOpenFile() {
   LogFSRAM fs;
   initFS(&fs);
-  LogFSFile file;
 
-  fs.createFile(defaultName, &file);
-
-  return fs.openFile(defaultName, &file) == LOGFS_OK;
+  fs.createFile(defaultName);
+  return fs.openFile(defaultName).getStatus() == LOGFS_OK;
 }
 
 bool createAndDeleteFile() {
   LogFSRAM fs;
   initFS(&fs);
-  LogFSFile file;
 
-  fs.createFile(defaultName, &file);
+  fs.createFile(defaultName);
   return fs.deleteFile(defaultName) == LOGFS_OK;
 }
 
@@ -86,12 +80,11 @@ bool deleteLongNameFile() {
 bool openDeletedFile() {
   LogFSRAM fs;
   initFS(&fs);
-  LogFSFile file;
 
-  fs.createFile(defaultName, &file);
+  fs.createFile(defaultName);
   fs.deleteFile(defaultName);
 
-  return fs.openFile(defaultName, &file) == LOGFS_ERR_FILE_NOT_FOUND;
+  return fs.openFile(defaultName).getStatus() == LOGFS_ERR_FILE_NOT_FOUND;
 }
 
 bool fileNotExist() {
@@ -104,18 +97,16 @@ bool fileNotExist() {
 bool fileExist() {
   LogFSRAM fs;
   initFS(&fs);
-  LogFSFile file;
 
-  fs.createFile(defaultName, &file);
+  fs.createFile(defaultName);
   return fs.exist(defaultName);
 }
 
 bool writeFile() {
   LogFSRAM fs;
   initFS(&fs);
-  LogFSFile file;
 
-  fs.createFile(defaultName, &file);
+  LogFSFile file = fs.createFile(defaultName);
   file.writeBytes((uint8_t*)defaultLogs, strlen(defaultLogs));
 
   char* pagesStart = (char*)&fs.fsio.data + fs.getHeader()->pagesStartAddress;
