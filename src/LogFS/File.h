@@ -13,18 +13,23 @@ class LogFSFile {
     LogFS* _fs;
     uint8_t _status;
     LogFSTableFile _tableFile;
+    uint16_t readPageIndex;
+    uint16_t readPageOffset;
 
   public:
     LogFSFile(LogFS* fs, LogFSTableFile* tableFile) {
       _fs = fs;
       _tableFile = tableFile;
       _status = LOGFS_OK;
+      readPageIndex = _tableFile.firstPageIndex;
+      readPageOffset = 0;
     }
     LogFSFile(uint8_t status) {
       _status = status;
     }
     uint8_t getStatus() { return _status; }
-    uint8_t writeBytes(uint8_t* data, uint32_t length);
+    uint8_t write(uint8_t* data, uint32_t length);
+    uint8_t read(uint8_t* data, uint32_t length);
 };
 
 #endif

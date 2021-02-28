@@ -101,7 +101,7 @@ bool writeFile() {
   LogFSRAMTest fs;
 
   LogFSFile file = fs.createFile(defaultName);
-  file.writeBytes((uint8_t*)defaultLogs, strlen(defaultLogs));
+  file.write((uint8_t*)defaultLogs, strlen(defaultLogs));
 
   char* pagesStart = (char*)&fs.fsio.data + fs.getHeader()->pagesStartAddress;
 
@@ -113,7 +113,20 @@ bool fileNotOpened() {
 
   LogFSFile file = fs.createFile(longName);
 
-  return file.writeBytes((uint8_t*)defaultLogs, strlen(defaultLogs)) == LOGFS_ERR_FILE_NOT_OPENED;
+  return file.write((uint8_t*)defaultLogs, strlen(defaultLogs)) == LOGFS_ERR_FILE_NOT_OPENED;
+}
+
+bool readFile() {
+  LogFSRAMTest fs;
+
+  uint8_t logsLength = strlen(defaultLogs) + 1;
+  LogFSFile file = fs.createFile(defaultName);
+  file.write((uint8_t*)defaultLogs, logsLength);
+
+  char buffer[logsLength];
+  file.read((uint8_t*)buffer, logsLength);
+
+  return strcmp(buffer, defaultLogs) == 0;
 }
 
 void testFile() {
@@ -131,4 +144,5 @@ void testFile() {
   test("file exist", fileExist());
   test("write file", writeFile());
   test("file not opened", fileNotOpened());
+  test("write and read file", readFile());
 }
