@@ -44,7 +44,7 @@ int32_t LogFS::allocatePage() {
         bool isPageFree = !(value & shift);
         if (isPageFree) {
           uint16_t pageIndex = i * 8 + j;
-          _fsio->writeByte(address + i, value & shift);
+          _fsio->writeByte(address + i, value | shift);
           _fsio->writeInt(_header.pagesStartAddress + pageIndex * _header.pageSize, 0);
           return pageIndex;
         }

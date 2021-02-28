@@ -8,8 +8,10 @@
 using namespace std;
 
 char defaultName[] = "file.txt";
+char secondFileName[] = "file2.txt";
 char longName[] = "12345678901234567890.txt";
 char defaultLogs[] = "some logs";
+char secondLogs[] = "another logs line";
 
 class LogFSRAMTest : public LogFSRAM {
   public:
@@ -129,6 +131,24 @@ bool readFile() {
   return strcmp(buffer, defaultLogs) == 0;
 }
 
+bool readTwoFile() {
+  LogFSRAMTest fs;
+
+  uint8_t logsLength1 = strlen(defaultLogs) + 1;
+  uint8_t logsLength2 = strlen(secondLogs) + 1;
+  LogFSFile file1 = fs.createFile(defaultName);
+  LogFSFile file2 = fs.createFile(secondFileName);
+  file1.write((uint8_t*)defaultLogs, logsLength1);
+  file2.write((uint8_t*)secondLogs, logsLength2);
+
+  char buffer1[logsLength1];
+  char buffer2[logsLength2];
+  file1.read((uint8_t*)buffer1, logsLength1);
+  file2.read((uint8_t*)buffer2, logsLength2);
+
+  return strcmp(buffer1, defaultLogs) == 0 && strcmp(buffer2, secondLogs) == 0;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -145,4 +165,5 @@ void testFile() {
   test("write file", writeFile());
   test("file not opened", fileNotOpened());
   test("write and read file", readFile());
+  test("write and read two files", readTwoFile());
 }
