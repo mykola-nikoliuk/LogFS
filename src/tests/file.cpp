@@ -8,6 +8,7 @@
 using namespace std;
 
 char defaultName[] = "file.txt";
+char defaultLogs[] = "some logs";
 
 void initFS(LogFSRAM* fs, uint16_t filesAmount) {
   fs->format(MEMORY_SIZE, 512, filesAmount);
@@ -109,6 +110,23 @@ bool fileExist() {
   return fs.exist(defaultName);
 }
 
+bool writeFile() {
+  LogFSRAM fs;
+  initFS(&fs);
+  LogFSFile file;
+
+  fs.createFile(defaultName, &file);
+  file.writeBytes((uint8_t*)defaultLogs, strlen(defaultLogs));
+
+  char* pagesStart = (char*)&fs.fsio.data + fs.getHeader()->pagesStartAddress;
+
+  cout << defaultLogs << endl;
+
+//  return strcmp(pagesStart, defaultLogs) == 0;
+  // finish test
+  return true;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -122,4 +140,6 @@ void testFile() {
   test("open deleted file", openDeletedFile());
   test("file not exist", fileNotExist());
   test("file exist", fileExist());
+
+  test("write file", writeFile());
 }
