@@ -12,11 +12,14 @@ class LogFS {
   private:
     LogFSHeader _header;
     FSIO* _fsio;
+    uint16_t _pagesUsed;
+
     uint32_t writeEmptyFileTable(uint32_t address, uint16_t filesAmount);
     void clearPages(uint32_t address, uint16_t pagesAmount);
     int32_t allocatePage();
     uint32_t fillTableFile(char* name, LogFSTableFile* tableFile);
     uint32_t getPageAddress(uint16_t pageIndex);
+    uint16_t getPagesUsed();
     friend class LogFSFile;
 
   public:
@@ -31,6 +34,10 @@ class LogFS {
     LogFSFile openFile(char* name);
     uint8_t deleteFile(char* name);
     bool exist(char* name);
+
+    uint32_t getTotalSize();
+    uint32_t getAvailableSize();
+    uint32_t getUsedSize();
 
     LogFSHeader* getHeader() { return &_header; }
 };

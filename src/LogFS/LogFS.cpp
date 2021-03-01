@@ -50,6 +50,7 @@ int32_t LogFS::allocatePage() {
           uint16_t pageIndex = i * 8 + j;
           _fsio->writeByte(address + i, value | shift);
           _fsio->writeInt(_header.pagesStartAddress + pageIndex * _header.pageSize, 0);
+          _pagesUsed++;
           return pageIndex;
         }
       }
@@ -82,6 +83,11 @@ uint32_t LogFS::getPageAddress(uint16_t pageIndex) {
   return _header.pagesStartAddress + _header.pageSize * pageIndex;
 }
 
+uint16_t LogFS::getPagesUsed() {
+  // TODO: implement
+  return 0;
+}
+
 // --- PUBLIC ---
 
 uint8_t LogFS::init() {
@@ -94,6 +100,8 @@ uint8_t LogFS::init() {
   if (_header.version != LogFS_VERSION) {
     return LOGFS_ERR_DIFFERENT_VERSION;
   }
+
+  _pagesUsed = getPagesUsed();
 
   return LOGFS_OK;
 }
@@ -217,4 +225,27 @@ bool LogFS::exist(char* name) {
   if(!fillTableFile(name, &tableFile)) return false;
 
   return true;
+}
+
+uint32_t LogFS::getTotalSize() {
+  // TODO: check for init
+
+  uint16_t pageBodySize = _header.pageSize - sizeof(_header.pagesAmount);
+  return _header.pagesAmount * pageBodySize;
+}
+
+uint32_t LogFS::getAvailableSize() {
+  // TODO: check for init
+
+  uint16_t pageBodySize = _header.pageSize - sizeof(_header.pagesAmount);
+  uint32_t totalSize = getTotalSize();
+  return totalSize - _pagesUsed * pageBodySize;
+}
+
+uint32_t LogFS::getUsedSize() {
+  // TODO: check for init
+
+  uint16_t pageBodySize = _header.pageSize - sizeof(_header.pagesAmount);
+  uint32_t totalSize = getTotalSize();
+  return totalSize - (_header.pagesAmount - _pagesUsed) * pageBodySize;
 }

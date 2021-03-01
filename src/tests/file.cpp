@@ -203,6 +203,27 @@ bool readByChunks() {
   return strcmp(buffer, logs);
 }
 
+bool getTotalSize() {
+  LogFSRAMTest fs;
+  return fs.getTotalSize() > 0;
+}
+
+bool getUsedSize() {
+  uint16_t pageSize = 256;
+  LogFSRAMTest fs(2, pageSize);
+  fs.createFile(defaultName);
+
+  return fs.getUsedSize() == pageSize - sizeof(fs.getHeader()->pagesAmount);
+}
+
+bool getAvailableSize() {
+  uint16_t pageSize = 256;
+  LogFSRAMTest fs(2, pageSize);
+  fs.createFile(defaultName);
+
+  return fs.getAvailableSize() == fs.getTotalSize() - fs.getUsedSize();
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -223,9 +244,11 @@ void testFile() {
   test("write and read more than page size", writeAndReadMoreThanPageSize());
   test("write by chunks", writeByChunks());
   test("read by chunks", readByChunks());
+  test("get total size", getTotalSize());
+  test("get used size", getUsedSize());
+  test("get available size", getAvailableSize());
 
   // delete file pages
 
-  // size of free space
   // read files list
 }
