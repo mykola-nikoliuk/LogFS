@@ -7,34 +7,11 @@
 
 using namespace std;
 
-#define PAGE_SIZE 512
-
 char defaultName[] = "file.txt";
 char secondFileName[] = "file2.txt";
 char longName[] = "12345678901234567890.txt";
 char defaultLogs[] = "some logs";
 char secondLogs[] = "another logs line";
-
-class LogFSRAMTest : public LogFSRAM {
-  public:
-    LogFSRAMTest(uint16_t filesAmount, uint16_t pageSize, uint32_t memorySize) : LogFSRAM() {
-      formatAndInit(filesAmount, pageSize, memorySize);
-    }
-    LogFSRAMTest(uint16_t filesAmount, uint16_t pageSize) : LogFSRAM() {
-      formatAndInit(filesAmount, pageSize, MEMORY_SIZE);
-    }
-    LogFSRAMTest(uint16_t filesAmount) : LogFSRAM() {
-      formatAndInit(filesAmount, PAGE_SIZE, MEMORY_SIZE);
-    }
-    LogFSRAMTest() : LogFSRAM() {
-      formatAndInit(64, PAGE_SIZE, MEMORY_SIZE);
-    }
-
-    void formatAndInit(uint8_t filesAmount, uint16_t pageSize, uint32_t memorySize) {
-      format(memorySize, pageSize, filesAmount);
-      init();
-    }
-};
 
 // --- TESTS ---
 
