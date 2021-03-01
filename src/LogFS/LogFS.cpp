@@ -5,6 +5,8 @@
 #include "./Header.h" // ??
 #include "./config.h"
 
+#include <iostream>
+
 using namespace std;
 
 LogFS::LogFS(FSIO* fsio) {
@@ -193,7 +195,7 @@ LogFSFile LogFS::createFile(char* name) {
 
   // fill the file structure
 
-  return LogFSFile(this, &tableFile);
+  return LogFSFile(this, &tableFile, tableFileAddress);
 }
 
 LogFSFile LogFS::openFile(char* name) {
@@ -207,7 +209,7 @@ LogFSFile LogFS::openFile(char* name) {
 
   // fill the file structure
 
-  return LogFSFile(this, &tableFile);
+  return LogFSFile(this, &tableFile, tableFileAddress);
 }
 
 uint8_t LogFS::deleteFile(char* name) {

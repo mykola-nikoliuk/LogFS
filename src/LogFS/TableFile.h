@@ -1,6 +1,7 @@
 #ifndef LOGFS_TABLE_FILE_H
 #define LOGFS_TABLE_FILE_H
 
+#include <string.h>
 #include <stdint.h>
 #include "config.h"
 
@@ -18,9 +19,7 @@ struct LogFSTableFile {
   }
 
   LogFSTableFile* operator=(LogFSTableFile* tableFile) {
-    firstPageIndex = tableFile->firstPageIndex;
-    lastPageIndex = tableFile->lastPageIndex;
-    lastPageOffset = tableFile->lastPageOffset;
+    memcpy(this, tableFile, sizeof(struct LogFSTableFile));
     return tableFile;
   }
 };

@@ -3,8 +3,6 @@
 #include "File.h"
 #include "config.h"
 
-using namespace std;
-
 uint8_t LogFSFile::write(uint8_t* data, uint32_t length) {
   if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
 
@@ -41,7 +39,9 @@ uint8_t LogFSFile::write(uint8_t* data, uint32_t length) {
       _fs->_fsio->writeShort(_fs->getPageAddress(_tableFile.lastPageIndex) + pageBodySize, pageIndexes[i]);
       _tableFile.lastPageOffset = 0;
       _tableFile.lastPageIndex = pageIndexes[i];
-      write(data + offset, fmin(pageBodySize, length - offset));
+      uint16_t localWriteLength = fmin(pageBodySize, length - offset);
+      write(data + offset, localWriteLength);
+      _tableFile.lastPageOffset = localWriteLength;
       offset += pageBodySize;
     }
   }
@@ -68,6 +68,29 @@ uint8_t LogFSFile::read(uint8_t* data, uint32_t length) {
   else {
     readPageOffset = length;
   }
+
+  return LOGFS_OK;
+}
+
+uint32_t LogFSFile::size() {
+  if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
+
+  uint16_t pagesCount = 0;
+  uint16_t pageIndex = _tableFile.firstPageIndex;
+  uint16_t pageBodySize = _fs->_header.pageSize - sizeof(_fs->_header.pagesAmount);
+
+  while (pageIndex != _tableFile.lastPageIndex) {
+    uint32_t address = _fs->getPageAddress(pageIndex) + pageBodySize;
+    pageIndex = _fs->_fsio->readShort(address);
+    pagesCount++;
+  }
+
+  return _tableFile.lastPageOffset + pageBodySize * pagesCount;
+}
+
+uint8_t LogFSFile::close() {
+  _status = LOGFS_FILE_CLOSED;
+  _fs->_fsio->writeBytes(_tableFileAddress, (uint8_t*)&_tableFile, sizeof(struct LogFSTableFile));
 
   return LOGFS_OK;
 }

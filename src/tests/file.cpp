@@ -240,6 +240,17 @@ bool readCreatedFiles() {
   return strcmp(buffer1, defaultName) == 0 && strcmp(buffer2, secondFileName) == 0;
 }
 
+bool checkWriteSize() {
+
+  LogFSRAMTest fs;
+  LogFSFile file = fs.createFile(defaultName);
+  uint8_t logLength = strlen(defaultLogs) + 1;
+  file.write((uint8_t*)defaultLogs, logLength);
+  file.write((uint8_t*)defaultLogs, logLength);
+
+  return file.size() == logLength * 2;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -266,6 +277,7 @@ void testFile() {
   test("release pages", releasePages());
   test("read empty files list", readEmptyFiles());
   test("read created files list", readCreatedFiles());
+  test("check write size", checkWriteSize());
 
   // page release after write with full storage
   // read files list
