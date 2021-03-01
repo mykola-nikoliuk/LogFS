@@ -5,8 +5,6 @@
 #include "./Header.h" // ??
 #include "./config.h"
 
-#include <iostream>
-
 using namespace std;
 
 LogFS::LogFS(FSIO* fsio) {
@@ -128,7 +126,7 @@ uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmo
   int64_t memoryForPages = capacity - header.pagesMapStartAddress;
 
   // 9th bit to count pagesMap size;
-  int16_t pagesAmount = (uint64_t(memoryForPages) * 8) / (uint64_t(pageSize) * 9);
+  int16_t pagesAmount = (uint64_t(memoryForPages) * 8) / (uint64_t(pageSize) * 8 + 1);
   if (pagesAmount == 0) return LOGFS_ERR_LOW_SPACE_PAGES;
 
   // TODO: check is pageAmount not bigger then sizeof(pageIndex) and raise an error
