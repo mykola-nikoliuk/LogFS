@@ -267,3 +267,8 @@ uint32_t LogFS::getUsedSize() {
   uint32_t totalSize = getTotalSize();
   return totalSize - (_header.pagesAmount - _pagesUsed) * pageBodySize;
 }
+
+LogFSDirectory LogFS::readFiles() {
+  // TODO: check for init
+  return LogFSDirectory(this);
+}

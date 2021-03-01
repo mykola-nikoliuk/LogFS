@@ -240,6 +240,29 @@ bool releasePages() {
   return sizeBefore == sizeAfter && sizeInTheMiddle != sizeAfter;
 }
 
+bool readEmptyFiles() {
+  LogFSRAMTest fs;
+
+  char buffer[16];
+
+  return fs.readFiles().next(buffer) == LOGFS_ERR_FILE_NOT_FOUND;
+}
+
+bool readCreatedFiles() {
+  LogFSRAMTest fs;
+
+  fs.createFile(defaultName);
+  fs.createFile(secondFileName);
+
+  char buffer1[16];
+  char buffer2[16];
+
+  LogFSDirectory dir = fs.readFiles();
+  dir.next(buffer1);
+  dir.next(buffer2);
+  return strcmp(buffer1, defaultName) == 0 && strcmp(buffer2, secondFileName) == 0;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -264,6 +287,8 @@ void testFile() {
   test("get used size", getUsedSize());
   test("get available size", getAvailableSize());
   test("release pages", releasePages());
+  test("read empty files list", readEmptyFiles());
+  test("read created files list", readCreatedFiles());
 
   // page release after write with full storage
   // read files list

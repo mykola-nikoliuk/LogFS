@@ -4,6 +4,7 @@
 #include "FSIO.h"
 #include "Header.h"
 #include "TableFile.h"
+#include "Directory.h"
 #include "File.h"
 #include <stdint.h>
 
@@ -22,6 +23,7 @@ class LogFS {
     uint32_t getPageAddress(uint16_t pageIndex);
     uint16_t getPagesUsed();
     friend class LogFSFile;
+    friend class LogFSDirectory;
 
   public:
     LogFS(FSIO* fsio);
@@ -39,6 +41,8 @@ class LogFS {
     uint32_t getTotalSize();
     uint32_t getAvailableSize();
     uint32_t getUsedSize();
+
+    LogFSDirectory readFiles();
 
     LogFSHeader* getHeader() { return &_header; }
 };
