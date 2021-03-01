@@ -17,6 +17,7 @@ class LogFS {
     uint32_t writeEmptyFileTable(uint32_t address, uint16_t filesAmount);
     void clearPages(uint32_t address, uint16_t pagesAmount);
     int32_t allocatePage();
+    void releasePage(uint16_t pageIndex);
     uint32_t fillTableFile(char* name, LogFSTableFile* tableFile);
     uint32_t getPageAddress(uint16_t pageIndex);
     uint16_t getPagesUsed();

@@ -224,6 +224,22 @@ bool getAvailableSize() {
   return fs.getAvailableSize() == fs.getTotalSize() - fs.getUsedSize();
 }
 
+bool releasePages() {
+  LogFSRAMTest fs;
+
+  uint32_t sizeBefore = fs.getAvailableSize();
+
+  fs.createFile(defaultName);
+
+  uint32_t sizeInTheMiddle = fs.getAvailableSize();
+
+
+  fs.deleteFile(defaultName);
+
+  uint32_t sizeAfter = fs.getAvailableSize();
+  return sizeBefore == sizeAfter && sizeInTheMiddle != sizeAfter;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -247,8 +263,8 @@ void testFile() {
   test("get total size", getTotalSize());
   test("get used size", getUsedSize());
   test("get available size", getAvailableSize());
+  test("release pages", releasePages());
 
-  // delete file pages
-
+  // page release after write with full storage
   // read files list
 }

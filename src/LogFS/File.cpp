@@ -27,7 +27,9 @@ uint8_t LogFSFile::write(uint8_t* data, uint32_t length) {
       int32_t pageIndex = _fs->allocatePage();
 
       if (pageIndex < 0) {
-        // TODO: release pages already taken
+        for (uint16_t j = i - 1; j >= 0; j--) {
+          _fs->releasePage(pageIndexes[j]);
+        }
         return LOGFS_ERR_LOW_SPACE_PAGES;
       }
 
