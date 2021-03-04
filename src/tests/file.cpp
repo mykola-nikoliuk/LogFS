@@ -90,7 +90,7 @@ bool writeFile() {
   LogFSFile file = fs.createFile(defaultName);
   file.write((uint8_t*)defaultLogs, strlen(defaultLogs));
 
-  char* pagesStart = (char*)&fs.fio.data + fs.getHeader()->pagesStartAddress;
+  char* pagesStart = (char*)&fs.fio.data + fs.getHeader()->sectorsStartAddress;
 
   return strcmp(pagesStart, defaultLogs) == 0;
 }
@@ -135,7 +135,7 @@ bool readTwoFile() {
 }
 
 bool writeAndReadMoreThanPageSize() {
-  LogFSRAMTest fs(2, 8, 1024);
+  LogFSRAMTest fs(1024);
 
   char log[] = "log that longer then page size";
   uint16_t logSize = strlen(log) + 1;
@@ -187,15 +187,14 @@ bool getTotalSize() {
 
 bool getUsedSize() {
   uint16_t pageSize = 256;
-  LogFSRAMTest fs(2, pageSize);
+  LogFSRAMTest fs;
   fs.createFile(defaultName);
 
   return fs.getUsedSize() == pageSize - sizeof(fs.getHeader()->pagesAmount);
 }
 
 bool getAvailableSize() {
-  uint16_t pageSize = 256;
-  LogFSRAMTest fs(2, pageSize);
+  LogFSRAMTest fs;
   fs.createFile(defaultName);
 
   return fs.getAvailableSize() == fs.getTotalSize() - fs.getUsedSize();

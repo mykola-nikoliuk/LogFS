@@ -10,12 +10,12 @@
 struct LogFSHeader {
   char name[6];
   uint8_t version;
-  uint16_t pageSize;            // 512, 1024, ..., 32768
+  uint16_t sectorSize;
+  uint16_t pageSize;
   uint16_t pagesAmount;
-  uint16_t filesAmount;
-  uint32_t filesStartAddress;
-  uint32_t pagesMapStartAddress;
-  uint32_t pagesStartAddress;
+  uint32_t filesStartAddress;     // 2nd sector
+  uint32_t pagesMapStartAddress;  // 3rd sector
+  uint32_t sectorsStartAddress;
 
   LogFSHeader();
 };

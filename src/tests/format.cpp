@@ -34,45 +34,27 @@ bool formatPageSize() {
   LogFSRAM fs;
 
   uint16_t pageSize = 16384;
-  fs.format(MEMORY_SIZE, pageSize);
+  fs.format(MEMORY_SIZE);
   fs.init();
   return fs.getHeader()->pageSize == pageSize;
-}
-
-bool formatFilesAmount() {
-  LogFSRAM fs;
-
-  uint16_t filesAmount = 1024;
-  fs.format(MEMORY_SIZE, 512, filesAmount);
-  fs.init();
-  return fs.getHeader()->filesAmount == filesAmount;
 }
 
 bool formatLowSpaceFileTable() {
   LogFSRAM fs;
 
-  uint16_t filesAmount = 32;
-  uint16_t pageSize = 512;
-
-  return fs.format(32, pageSize, filesAmount) == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
+  return fs.format(32) == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 }
 
 bool formatLowSpacePages() {
   LogFSRAM fs;
 
-  uint16_t filesAmount = 8;
-  uint16_t pageSize = 1024;
-
-  return fs.format(1024, pageSize, filesAmount) == LOGFS_ERR_LOW_SPACE_PAGES;
+  return fs.format(1024) == LOGFS_ERR_LOW_SPACE_PAGES;
 }
 
 bool formatOk() {
   LogFSRAM fs;
 
-  uint16_t filesAmount = 1;
-  uint16_t pageSize = 512;
-
-  return fs.format(1024, pageSize, filesAmount) == LOGFS_OK;
+  return fs.format(1024) == LOGFS_OK;
 }
 
 void testFormat() {
@@ -82,7 +64,6 @@ void testFormat() {
   test("different version", differentVersion());
   test("init", formatInit());
   test("page size", formatPageSize());
-  test("files amount", formatFilesAmount());
   test("low space for file table", formatLowSpaceFileTable());
   test("low space for pages", formatLowSpacePages());
   test("ok", formatOk());
