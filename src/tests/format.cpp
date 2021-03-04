@@ -7,7 +7,7 @@
 
 using namespace std;
 
-#define MEMORY_SIZE 1024 * 1024
+#define TEST_MEMORY_SIZE 1024 * 1024
 
 bool notFormatted() {
   LogFSRAM fs;
@@ -26,7 +26,7 @@ bool differentVersion() {
 bool formatInit() {
   LogFSRAM fs;
 
-  fs.format(MEMORY_SIZE);
+  fs.format();
   return fs.init() == LOGFS_OK;
 }
 
@@ -34,7 +34,7 @@ bool formatPageSize() {
   LogFSRAM fs;
 
   uint16_t pageSize = 16384;
-  fs.format(MEMORY_SIZE);
+  fs.format();
   fs.init();
   return fs.getHeader()->pageSize == pageSize;
 }
@@ -42,19 +42,19 @@ bool formatPageSize() {
 bool formatLowSpaceFileTable() {
   LogFSRAM fs;
 
-  return fs.format(32) == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
+  return fs.format() == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 }
 
 bool formatLowSpacePages() {
   LogFSRAM fs;
 
-  return fs.format(1024) == LOGFS_ERR_LOW_SPACE_PAGES;
+  return fs.format() == LOGFS_ERR_LOW_SPACE_PAGES;
 }
 
 bool formatOk() {
   LogFSRAM fs;
 
-  return fs.format(1024) == LOGFS_OK;
+  return fs.format() == LOGFS_OK;
 }
 
 void testFormat() {

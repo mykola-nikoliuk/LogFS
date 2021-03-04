@@ -4,13 +4,13 @@
 #include <stdint.h>
 #include "../LogFS/LogFS.h"
 
-#define MEMORY_SIZE 1024 * 1024
 #define SECTOR_SIZE 4096
 #define PAGE_SIZE 256
+#define MEMORY_SIZE 16 * SECTOR_SIZE
 
 struct RAMFlashIO : public FlashIO {
-  RAMFlashIO(uint16_t sectorSize = SECTOR_SIZE, uint16_t pageSize = PAGE_SIZE) :
-    FlashIO(sectorSize, pageSize) {};
+  RAMFlashIO(uint32_t capacity = MEMORY_SIZE, uint16_t sectorSize = SECTOR_SIZE, uint16_t pageSize = PAGE_SIZE) :
+    FlashIO(capacity, sectorSize, pageSize) {};
 
   uint8_t data[MEMORY_SIZE];
 
@@ -24,16 +24,30 @@ struct RAMFlashIO : public FlashIO {
   }
 
   virtual void resetChip() {
-    // todo: add logic
+    for (uint32_t i = 0; i < getCapacity(); i++) {
+      data[i] = 0xFF;
+    }
   };
   virtual void resetSector(uint32_t sectorIndex) {
-    // todo: add logic
+    uint32_t address = sectorIndex * getSectorSize();
+    uint16_t sectorSize = getSectorSize();
+    for (uint32_t i = 0; i < sectorSize; i++) {
+      data[address + i] = 0xFF;
+    }
   };
   virtual void writePage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t *pageData) {
-    // todo: add logic
+    uint16_t pageSize = getPageSize();
+    uint32_t address = sectorIndex * getSectorSize() + pageIndex * pageSize;
+    for (uint32_t i = 0; i < pageSize; i++) {
+      data[address + i] &= pageData[i];
+    }
   };
   virtual void readPage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t *pageData) {
-    // todo: add logic
+    uint16_t pageSize = getPageSize();
+    uint32_t address = sectorIndex * getSectorSize() + pageIndex * pageSize;
+    for (uint32_t i = 0; i < pageSize; i++) {
+      pageData[i] = data[address + i];
+    }
   };
 };
 
@@ -46,12 +60,8 @@ public:
 
 class LogFSRAMTest : public LogFSRAM {
 public:
-  LogFSRAMTest(uint32_t memorySize = MEMORY_SIZE) : LogFSRAM() {
-    formatAndInit(MEMORY_SIZE);
-  }
-
-  void formatAndInit(uint32_t memorySize) {
-    format(memorySize);
+  LogFSRAMTest() : LogFSRAM() {
+    format();
     init();
   }
 };

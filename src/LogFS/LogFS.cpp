@@ -116,7 +116,7 @@ uint8_t LogFS::init() {
   return LOGFS_OK;
 }
 
-uint8_t LogFS::format(uint32_t capacity) {
+uint8_t LogFS::format() {
   LogFSHeader header;
   strcpy(header.name, LogFS_NAME);
   header.version = LogFS_VERSION;
@@ -125,10 +125,10 @@ uint8_t LogFS::format(uint32_t capacity) {
   header.filesStartAddress = header.sectorSize; // 2nd sector
 
   header.pagesMapStartAddress = header.sectorSize * 2; // third sector
-  if (header.pagesMapStartAddress > capacity) return LOGFS_ERR_LOW_SPACE_FILE_TABLE;
+  if (header.pagesMapStartAddress > _fio->getCapacity()) return LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 
   uint32_t pageMapSize = header.sectorSize;
-  int64_t memoryForPages = capacity - header.pagesMapStartAddress - pageMapSize;
+  int64_t memoryForPages = _fio->getCapacity() - header.pagesMapStartAddress - pageMapSize;
 
   // 9th bit to count pagesMap size;
   int16_t pagesAmount = memoryForPages / header.sectorSize;

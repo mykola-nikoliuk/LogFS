@@ -29,7 +29,7 @@ class LogFS {
     LogFS(FlashIO* fio);
 
     uint8_t init();
-    uint8_t format(uint32_t capacity);
+    uint8_t format();
 
 //    LogFSFile createFile(char* name);
 //    LogFSFile openFile(char* name);

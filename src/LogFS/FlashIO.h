@@ -5,11 +5,13 @@
 
 struct FlashIO {
 private:
+  uint32_t _capacity;
   uint16_t _pageSize;
   uint16_t _sectorSize;
 
 public:
-  FlashIO(uint16_t sectorSize, uint16_t pageSize) {
+  FlashIO(uint32_t capacity, uint16_t sectorSize, uint16_t pageSize) {
+    _capacity = capacity;
     _sectorSize = sectorSize;
     _pageSize = pageSize;
   }
@@ -22,6 +24,7 @@ public:
   virtual void writePage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t* pageData) = 0;
   virtual void readPage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t* pageData) = 0;
 
+  uint16_t getCapacity() { return _capacity; }
   uint16_t getSectorSize() { return _sectorSize; }
   uint16_t getPageSize() { return _pageSize; }
 
