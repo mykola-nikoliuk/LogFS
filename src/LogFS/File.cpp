@@ -12,7 +12,7 @@ uint8_t LogFSFile::write(uint8_t* data, uint32_t length) {
 
   uint16_t writeLength = fmin(sizeToEndOfPage, length);
   uint32_t address = _fs->getPageAddress(_tableFile.lastPageIndex) + _tableFile.lastPageOffset;
-  _fs->_fsio->writeBytes(address, data, fmin(sizeToEndOfPage, writeLength));
+  _fs->_fio->writeBytes(address, data, fmin(sizeToEndOfPage, writeLength));
   _tableFile.lastPageOffset += writeLength;
 
 
@@ -36,7 +36,7 @@ uint8_t LogFSFile::write(uint8_t* data, uint32_t length) {
 
     uint32_t offset = sizeToEndOfPage;
     for (uint16_t i = 0; i < pagesNeeded; i++) {
-      _fs->_fsio->writeShort(_fs->getPageAddress(_tableFile.lastPageIndex) + pageBodySize, pageIndexes[i]);
+      _fs->_fio->writeShort(_fs->getPageAddress(_tableFile.lastPageIndex) + pageBodySize, pageIndexes[i]);
       _tableFile.lastPageOffset = 0;
       _tableFile.lastPageIndex = pageIndexes[i];
       uint16_t localWriteLength = fmin(pageBodySize, length - offset);
@@ -57,11 +57,11 @@ uint8_t LogFSFile::read(uint8_t* data, uint32_t length) {
 
 
   uint32_t address = _fs->getPageAddress(readPageIndex) + readPageOffset;
-  _fs->_fsio->readBytes(address, data, fmin(length, sizeToEndOfPage));
+  _fs->_fio->readBytes(address, data, fmin(length, sizeToEndOfPage));
 
   if (length > sizeToEndOfPage) {
     readPageOffset = 0;
-    readPageIndex = _fs->_fsio->readShort(_fs->getPageAddress(readPageIndex) + pageBodySize);
+    readPageIndex = _fs->_fio->readShort(_fs->getPageAddress(readPageIndex) + pageBodySize);
 
     read(data + sizeToEndOfPage, length - sizeToEndOfPage);
   }
@@ -81,7 +81,7 @@ uint32_t LogFSFile::size() {
 
   while (pageIndex != _tableFile.lastPageIndex) {
     uint32_t address = _fs->getPageAddress(pageIndex) + pageBodySize;
-    pageIndex = _fs->_fsio->readShort(address);
+    pageIndex = _fs->_fio->readShort(address);
     pagesCount++;
   }
 
@@ -90,7 +90,7 @@ uint32_t LogFSFile::size() {
 
 uint8_t LogFSFile::close() {
   _status = LOGFS_FILE_CLOSED;
-  _fs->_fsio->writeBytes(_tableFileAddress, (uint8_t*)&_tableFile, sizeof(struct LogFSTableFile));
+  _fs->_fio->writeBytes(_tableFileAddress, (uint8_t*)&_tableFile, sizeof(struct LogFSTableFile));
 
   return LOGFS_OK;
 }

@@ -9,8 +9,8 @@
 
 using namespace std;
 
-LogFS::LogFS(FSIO* fsio) {
-  _fsio = fsio;
+LogFS::LogFS(FlashIO* fio) {
+  _fio = fio;
 }
 
 uint32_t LogFS::writeEmptyFileTable(uint32_t address, uint16_t filesAmount) {
@@ -20,7 +20,7 @@ uint32_t LogFS::writeEmptyFileTable(uint32_t address, uint16_t filesAmount) {
   file.isEmpty = true;
 
   for (uint16_t i = 0; i < filesAmount; i++) {
-    _fsio->writeBytes(address + i * fileSize, (uint8_t*)&file, fileSize);
+    _fio->writeBytes(address + i * fileSize, (uint8_t*)&file, fileSize);
   }
 
   return address + fileSize * filesAmount;
@@ -29,7 +29,7 @@ uint32_t LogFS::writeEmptyFileTable(uint32_t address, uint16_t filesAmount) {
 void LogFS::clearPages(uint32_t address, uint16_t pagesAmount) {
   uint32_t zero = 0;
   for (uint16_t i = 0; i < pagesAmount; i++) {
-    _fsio->writeInt(
+    _fio->writeInt(
       address + i * _header.pageSize + _header.pageSize - sizeof(zero),
       zero
     );
@@ -40,7 +40,7 @@ int32_t LogFS::allocatePage() {
   uint32_t address = _header.pagesMapStartAddress;
 
   for (uint16_t i = 0; i < _header.pagesAmount; i++) {
-    uint8_t value = _fsio->readByte(address + i);
+    uint8_t value = _fio->readByte(address + i);
     if (value < 255) {
       for (uint8_t j = 0; j < 8; j++) {
         uint8_t shiftIndex = 8 - j - 1;
@@ -48,8 +48,8 @@ int32_t LogFS::allocatePage() {
         bool isPageFree = !(value & shift);
         if (isPageFree) {
           uint16_t pageIndex = i * 8 + j;
-          _fsio->writeByte(address + i, value | shift);
-          _fsio->writeInt(_header.pagesStartAddress + pageIndex * _header.pageSize, 0);
+          _fio->writeByte(address + i, value | shift);
+          _fio->writeInt(_header.pagesStartAddress + pageIndex * _header.pageSize, 0);
           _pagesUsed++;
           return pageIndex;
         }
@@ -65,9 +65,9 @@ void LogFS::releasePage(uint16_t pageIndex) {
   uint16_t pageBlockIndex = pageIndex / 8;
   uint8_t pageBlockBit = 8 - pageIndex % 8 - 1;
 
-  uint8_t state = _fsio->readByte(_header.pagesMapStartAddress + pageBlockIndex);
+  uint8_t state = _fio->readByte(_header.pagesMapStartAddress + pageBlockIndex);
   state |= 1 << pageBlockBit;
-  _fsio->writeByte(_header.pagesMapStartAddress + pageBlockIndex, state);
+  _fio->writeByte(_header.pagesMapStartAddress + pageBlockIndex, state);
 }
 
 uint32_t LogFS::fillTableFile(char* name, LogFSTableFile* tableFile) {
@@ -76,8 +76,8 @@ uint32_t LogFS::fillTableFile(char* name, LogFSTableFile* tableFile) {
 
   for (uint16_t i = 0; i < _header.filesAmount; i++) {
     uint32_t address = _header.filesStartAddress + i * tableFileSize;
-    if (!_fsio->readByte(address)) {
-      _fsio->readBytes(address, (uint8_t*)tableFile, tableFileSize);
+    if (!_fio->readByte(address)) {
+      _fio->readBytes(address, (uint8_t*)tableFile, tableFileSize);
 
       if (strcmp(tableFile->name, name) == 0) {
         tableFileAddress = address;
@@ -101,7 +101,7 @@ uint16_t LogFS::getPagesUsed() {
 // --- PUBLIC ---
 
 uint8_t LogFS::init() {
-  _fsio->readBytes(0, (uint8_t*)&_header, sizeof(struct LogFSHeader));
+  _fio->readBytes(0, (uint8_t*)&_header, sizeof(struct LogFSHeader));
 
   if (strcmp(_header.name, LogFS_NAME)) {
     return LOGFS_ERR_NOT_FORMATTED;
@@ -114,14 +114,6 @@ uint8_t LogFS::init() {
   _pagesUsed = getPagesUsed();
 
   return LOGFS_OK;
-}
-
-uint8_t LogFS::format(uint32_t capacity) {
-  return LogFS::format(capacity, DEFAULT_PAGE_SIZE, DEFAULT_MAX_FILES_AMOUNT);
-}
-
-uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize) {
-  return LogFS::format(capacity, pageSize, DEFAULT_MAX_FILES_AMOUNT);
 }
 
 uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount) {
@@ -148,13 +140,13 @@ uint8_t LogFS::format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmo
   // start format memory
   uint32_t address = 0;
   // header
-  address = _fsio->writeBytes(address, (uint8_t*)&header, sizeof(struct LogFSHeader));
+  address = _fio->writeBytes(address, (uint8_t*)&header, sizeof(struct LogFSHeader));
   // file table
   address = writeEmptyFileTable(address, maxFilesAmount);
   // files map
   uint8_t zero = 0;
   for (uint16_t i = 0; i < pagesAmount; i++) {
-    _fsio->writeByte(address + i, zero);
+    _fio->writeByte(address + i, zero);
   }
   address += pagesAmount;
 
@@ -171,8 +163,8 @@ LogFSFile LogFS::createFile(char* name) {
   uint32_t tableFileSize = sizeof(struct LogFSTableFile);
   for (uint16_t i = 0; i < _header.filesAmount; i++) {
     uint32_t address = _header.filesStartAddress + i * tableFileSize;
-    if (_fsio->readByte(address)) {
-      _fsio->readBytes(address, (uint8_t*)&tableFile, tableFileSize);
+    if (_fio->readByte(address)) {
+      _fio->readBytes(address, (uint8_t*)&tableFile, tableFileSize);
 
       tableFile.isEmpty = false;
       strcpy(tableFile.name, name);
@@ -191,7 +183,7 @@ LogFSFile LogFS::createFile(char* name) {
   tableFile.firstPageIndex = pageIndex;
   tableFile.lastPageIndex = pageIndex;
   tableFile.lastPageOffset = 0;
-  _fsio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, tableFileSize);
+  _fio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, tableFileSize);
 
   // fill the file structure
 
@@ -228,11 +220,11 @@ uint8_t LogFS::deleteFile(char* name) {
     releasePage(pageIndex);
     if (pageIndex == tableFile.lastPageIndex) break;
 
-    tableFile.firstPageIndex = pageIndex = _fsio->readShort(getPageAddress(pageIndex) + pageBodySize);
+    tableFile.firstPageIndex = pageIndex = _fio->readShort(getPageAddress(pageIndex) + pageBodySize);
   }
 
   tableFile.isEmpty = true;
-  _fsio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, sizeof(struct LogFSTableFile));
+  _fio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, sizeof(struct LogFSTableFile));
 
   return LOGFS_OK;
 }

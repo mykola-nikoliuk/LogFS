@@ -18,8 +18,8 @@ bool notFormatted() {
 bool differentVersion() {
   LogFSRAM fs;
 
-  strcpy((char*)fs.fsio.data, "LOGFS");
-  fs.fsio.data[6] = 2;
+  strcpy((char*)fs.fio.data, "LOGFS");
+  fs.fio.data[6] = 2;
   return fs.init() == LOGFS_ERR_DIFFERENT_VERSION;
 }
 

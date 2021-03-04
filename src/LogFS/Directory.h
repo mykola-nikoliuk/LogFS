@@ -2,7 +2,7 @@
 #define LOGFS_DIRECTORY_H
 
 #include <stdint.h>
-#include "FSIO.h"
+#include "FlashIO.h"
 #include "TableFile.h"
 #include "config.h"
 

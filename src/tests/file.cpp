@@ -90,7 +90,7 @@ bool writeFile() {
   LogFSFile file = fs.createFile(defaultName);
   file.write((uint8_t*)defaultLogs, strlen(defaultLogs));
 
-  char* pagesStart = (char*)&fs.fsio.data + fs.getHeader()->pagesStartAddress;
+  char* pagesStart = (char*)&fs.fio.data + fs.getHeader()->pagesStartAddress;
 
   return strcmp(pagesStart, defaultLogs) == 0;
 }

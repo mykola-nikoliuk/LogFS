@@ -1,7 +1,7 @@
 #ifndef LOGFS_H
 #define LOGFS_H
 
-#include "FSIO.h"
+#include "FlashIO.h"
 #include "Header.h"
 #include "TableFile.h"
 #include "Directory.h"
@@ -12,7 +12,7 @@ class LogFS {
 
   private:
     LogFSHeader _header;
-    FSIO* _fsio;
+    FlashIO* _fio;
     uint16_t _pagesUsed;
 
     uint32_t writeEmptyFileTable(uint32_t address, uint16_t filesAmount);
@@ -26,12 +26,10 @@ class LogFS {
     friend class LogFSDirectory;
 
   public:
-    LogFS(FSIO* fsio);
+    LogFS(FlashIO* fio);
 
     uint8_t init();
-    uint8_t format(uint32_t capacity);
-    uint8_t format(uint32_t capacity, uint16_t pageSize);
-    uint8_t format(uint32_t capacity, uint16_t pageSize, uint16_t maxFilesAmount);
+    uint8_t format(uint32_t capacity, uint16_t pageSize = DEFAULT_PAGE_SIZE, uint16_t maxFilesAmount = DEFAULT_MAX_FILES_AMOUNT);
 
     LogFSFile createFile(char* name);
     LogFSFile openFile(char* name);
