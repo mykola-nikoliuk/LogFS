@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#include <iostream>
+
+using namespace std;
+
 struct FlashIO {
 private:
   uint32_t _capacity;
@@ -24,7 +28,7 @@ public:
   virtual void writePage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t* pageData) = 0;
   virtual void readPage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t* pageData) = 0;
 
-  uint16_t getCapacity() { return _capacity; }
+  uint32_t getCapacity() { return _capacity; }
   uint16_t getSectorSize() { return _sectorSize; }
   uint16_t getPageSize() { return _pageSize; }
 

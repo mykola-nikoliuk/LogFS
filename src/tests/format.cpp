@@ -15,12 +15,10 @@ bool notFormatted() {
   return fs.init() == LOGFS_ERR_NOT_FORMATTED;
 }
 
-bool differentVersion() {
+bool formatOk() {
   LogFSRAM fs;
 
-  strcpy((char*)fs.fio.data, "LOGFS");
-  fs.fio.data[6] = 2;
-  return fs.init() == LOGFS_ERR_DIFFERENT_VERSION;
+  return fs.format() == LOGFS_OK;
 }
 
 bool formatInit() {
@@ -30,41 +28,45 @@ bool formatInit() {
   return fs.init() == LOGFS_OK;
 }
 
-bool formatPageSize() {
+bool differentVersion() {
   LogFSRAM fs;
 
-  uint16_t pageSize = 16384;
+  strcpy((char*)fs.fio.data, "LOGFS");
+  fs.fio.data[6] = 2;
+  return fs.init() == LOGFS_ERR_DIFFERENT_VERSION;
+}
+
+bool formatPageSize() {
+  uint16_t pageSize = 64;
+  RAMFlashIO fio(MAX_MEMORY_SIZE, SECTOR_SIZE, pageSize);
+  LogFS fs(&fio);
   fs.format();
   fs.init();
   return fs.getHeader()->pageSize == pageSize;
 }
 
 bool formatLowSpaceFileTable() {
-  LogFSRAM fs;
+  RAMFlashIO fio(SECTOR_SIZE * 2 - 1);
+  LogFS fs(&fio);
 
   return fs.format() == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
 }
 
 bool formatLowSpacePages() {
-  LogFSRAM fs;
+  RAMFlashIO fio(SECTOR_SIZE * 4 - 1);
+  LogFS fs(&fio);
 
   return fs.format() == LOGFS_ERR_LOW_SPACE_PAGES;
-}
-
-bool formatOk() {
-  LogFSRAM fs;
-
-  return fs.format() == LOGFS_OK;
 }
 
 void testFormat() {
   cout << "Format:" << endl;
 
   test("not formatted error", notFormatted());
-  test("different version", differentVersion());
+  test("ok", formatOk());
   test("init", formatInit());
+  test("different version", differentVersion());
   test("page size", formatPageSize());
   test("low space for file table", formatLowSpaceFileTable());
   test("low space for pages", formatLowSpacePages());
-  test("ok", formatOk());
 }

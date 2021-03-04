@@ -3,16 +3,19 @@
 
 #include <stdint.h>
 #include "../LogFS/LogFS.h"
+#include <iostream>
 
 #define SECTOR_SIZE 4096
 #define PAGE_SIZE 256
-#define MEMORY_SIZE 16 * SECTOR_SIZE
+#define MAX_MEMORY_SIZE 16 * SECTOR_SIZE
 
 struct RAMFlashIO : public FlashIO {
-  RAMFlashIO(uint32_t capacity = MEMORY_SIZE, uint16_t sectorSize = SECTOR_SIZE, uint16_t pageSize = PAGE_SIZE) :
-    FlashIO(capacity, sectorSize, pageSize) {};
+  RAMFlashIO(uint32_t capacity = MAX_MEMORY_SIZE, uint16_t sectorSize = SECTOR_SIZE, uint16_t pageSize = PAGE_SIZE) :
+    FlashIO(capacity, sectorSize, pageSize) {
 
-  uint8_t data[MEMORY_SIZE];
+  };
+
+  uint8_t data[MAX_MEMORY_SIZE];
 
   uint32_t writeByte(uint32_t address, uint8_t value) {
     data[address] = value;
