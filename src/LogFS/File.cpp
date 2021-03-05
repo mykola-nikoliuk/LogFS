@@ -6,7 +6,7 @@
 uint8_t LogFSFile::write(uint8_t* data, uint32_t length) {
   if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
 
-  uint16_t pageBodySize = _fs->_header.pageSize - sizeof(_fs->_header.pagesAmount);
+  uint16_t pageBodySize = _fs->_header.pageSize - sizeof(_fs->_header.sectorsAmount);
 
   uint16_t sizeToEndOfPage = pageBodySize - _tableFile.lastPageOffset;
 
@@ -52,7 +52,7 @@ uint8_t LogFSFile::write(uint8_t* data, uint32_t length) {
 uint8_t LogFSFile::read(uint8_t* data, uint32_t length) {
   if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
 
-  uint16_t pageBodySize = _fs->_header.pageSize - sizeof(_fs->_header.pagesAmount);
+  uint16_t pageBodySize = _fs->_header.pageSize - sizeof(_fs->_header.sectorsAmount);
   uint16_t sizeToEndOfPage = pageBodySize - readPageOffset;
 
 
@@ -77,7 +77,7 @@ uint32_t LogFSFile::size() {
 
   uint16_t pagesCount = 0;
   uint16_t pageIndex = _tableFile.firstPageIndex;
-  uint16_t pageBodySize = _fs->_header.pageSize - sizeof(_fs->_header.pagesAmount);
+  uint16_t pageBodySize = _fs->_header.pageSize - sizeof(_fs->_header.sectorsAmount);
 
   while (pageIndex != _tableFile.lastPageIndex) {
     uint32_t address = _fs->getPageAddress(pageIndex) + pageBodySize;
@@ -90,7 +90,7 @@ uint32_t LogFSFile::size() {
 
 uint8_t LogFSFile::close() {
   _status = LOGFS_FILE_CLOSED;
-  _fs->_fio->writeBytes(_tableFileAddress, (uint8_t*)&_tableFile, sizeof(struct LogFSTableFile));
+  _fs->_fio->writeBytes(_tableFileAddress, (uint8_t*)&_tableFile, sizeof(struct LogFSSectorFlags));
 
   return LOGFS_OK;
 }

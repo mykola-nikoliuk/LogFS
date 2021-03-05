@@ -20,8 +20,8 @@ public:
     _pageSize = pageSize;
   }
 
-  void writeBytes(uint32_t sectorIndex, uint16_t pageIndex, uint16_t offset, uint8_t* data, uint16_t length);
-  void readBytes(uint32_t sectorIndex, uint16_t pageIndex, uint16_t offset, uint8_t* data, uint16_t length);
+  void writeBytes(uint32_t sectorIndex, uint16_t pageIndex, uint16_t offset, void* data, uint16_t length);
+  void readBytes(uint32_t sectorIndex, uint16_t pageIndex, uint16_t offset, void* data, uint16_t length);
 
   virtual void resetChip() = 0;
   virtual void resetSector(uint32_t sectorIndex) = 0;

@@ -12,9 +12,8 @@ struct LogFSHeader {
   uint8_t version;
   uint16_t sectorSize;
   uint16_t pageSize;
-  uint16_t pagesAmount;
-  uint32_t filesStartAddress;     // 2nd sector
-  uint32_t pagesMapStartAddress;  // 3rd sector
+  uint16_t sectorsAmount;
+  uint32_t sectorsMapStartAddress;
   uint32_t sectorsStartAddress;
 
   LogFSHeader();

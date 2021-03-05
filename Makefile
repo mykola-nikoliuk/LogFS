@@ -2,7 +2,7 @@ CC=g++
 CFLAGS=-c -Wall
 LDFLAGS=
 SOURCES=src/main.cpp \
-	src/tests/test.cpp src/tests/format.cpp \
+	src/tests/test.cpp src/tests/format.cpp src/tests/file.cpp \
 	src/LogFS/LogFS.cpp src/LogFS/Header.cpp src/LogFS/FlashIO.cpp
 
 OBJECTS=$(SOURCES:.cpp=.o)

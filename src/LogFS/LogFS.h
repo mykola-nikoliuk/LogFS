@@ -3,7 +3,7 @@
 
 #include "FlashIO.h"
 #include "Header.h"
-#include "TableFile.h"
+#include "SectorFlags.h"
 #include "Directory.h"
 #include "File.h"
 #include <stdint.h>
@@ -16,10 +16,10 @@ class LogFS {
     uint16_t _pagesUsed;
 
 //    uint32_t writeEmptyFileTable(uint32_t address, uint16_t filesAmount);
-//    void clearPages(uint32_t address, uint16_t pagesAmount);
+//    void clearPages(uint32_t address, uint16_t sectorsAmount);
 //    int32_t allocatePage();
 //    void releasePage(uint16_t pageIndex);
-//    uint32_t fillTableFile(char* name, LogFSTableFile* tableFile);
+//    uint32_t fillTableFile(char* name, LogFSSectorFlags* tableFile);
 //    uint32_t getPageAddress(uint16_t pageIndex);
     uint16_t getPagesUsed();
 //    friend class LogFSFile;
@@ -31,7 +31,7 @@ class LogFS {
     uint8_t init();
     uint8_t format();
 
-//    LogFSFile createFile(char* name);
+    LogFSFile createFile(char* name);
 //    LogFSFile openFile(char* name);
 //    uint8_t deleteFile(char* name);
 //    bool exist(char* name);

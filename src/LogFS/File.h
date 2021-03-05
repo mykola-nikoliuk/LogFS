@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "FlashIO.h"
-#include "TableFile.h"
+#include "SectorFlags.h"
 #include "config.h"
 
 class LogFS;
@@ -12,19 +12,16 @@ class LogFSFile {
   private:
     LogFS* _fs;
     uint8_t _status;
-    LogFSTableFile _tableFile;
-    uint32_t _tableFileAddress;
+    uint32_t _startSectorIndex;
+
     uint16_t readPageIndex;
     uint16_t readPageOffset;
 
   public:
-    LogFSFile(LogFS* fs, LogFSTableFile* tableFile, uint32_t tableFileAddress) {
+    LogFSFile(LogFS* fs, uint32_t sectorIndex) {
       _fs = fs;
-      _tableFile = tableFile;
-      _tableFileAddress = tableFileAddress;
       _status = LOGFS_OK;
-      readPageIndex = _tableFile.firstPageIndex;
-      readPageOffset = 0;
+      _startSectorIndex = sectorIndex;
     }
     LogFSFile(uint8_t status) {
       _status = status;
