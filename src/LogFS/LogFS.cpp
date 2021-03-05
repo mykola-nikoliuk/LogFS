@@ -13,29 +13,10 @@ using namespace std;
 LogFS::LogFS(FlashIO *fio) {
   _fio = fio;
 }
-//
-//uint32_t LogFS::writeEmptyFileTable(uint32_t address, uint16_t filesAmount) {
-//  uint16_t fileSize = sizeof(struct LogFSSectorFlags);
-//
-//  LogFSSectorFlags file;
-//  file.isEmpty = true;
-//
-//  for (uint16_t i = 0; i < filesAmount; i++) {
-//    _fio->writeBytes(address + i * fileSize, (uint8_t*)&file, fileSize);
-//  }
-//
-//  return address + fileSize * filesAmount;
-//}
-//
-//void LogFS::clearPages(uint32_t address, uint16_t sectorsAmount) {
-//  uint32_t zero = 0;
-//  for (uint16_t i = 0; i < sectorsAmount; i++) {
-//    _fio->writeInt(
-//      address + i * _header.pageSize + _header.pageSize - sizeof(zero),
-//      zero
-//    );
-//  }
-//}
+
+uint32_t LogFS::getPageIndex(uint32_t offset) {
+  return offset / _header.sectorSize;
+}
 
 uint32_t LogFS::allocateSector(uint8_t flags) {
   LogFSSectorFlags sectorFlags;

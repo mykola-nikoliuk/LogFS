@@ -16,14 +16,13 @@ class LogFS {
     FlashIO* _fio;
     uint32_t _sectorsUsed;
 
-//    uint32_t writeEmptyFileTable(uint32_t address, uint16_t filesAmount);
-//    void clearPages(uint32_t address, uint16_t sectorsAmount);
+    uint32_t getPageIndex(uint32_t offset);
     uint32_t allocateSector(uint8_t flags);
     void releaseSector(uint32_t sectorIndex);
     uint32_t readFileHeader(char* name, LogFSFileHeader* fileHeader);
 //    uint32_t getPageAddress(uint16_t pageIndex);
     uint16_t getPagesUsed();
-//    friend class LogFSFile;
+    friend class LogFSFile;
 //    friend class LogFSDirectory;
 
   public:

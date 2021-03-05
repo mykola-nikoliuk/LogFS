@@ -81,25 +81,21 @@ bool fileExist() {
   return fs.exist(defaultName);
 }
 
-//bool writeFile() {
-//  LogFSRAMTest fs;
-//
-//  LogFSFile file = fs.createFile(defaultName);
-//  file.write((uint8_t*)defaultLogs, strlen(defaultLogs));
-//
-//  char* pagesStart = (char*)&fs.fio.data + fs.getHeader()->sectorsStartAddress;
-//
-//  return strcmp(pagesStart, defaultLogs) == 0;
-//}
+bool writeFile() {
+  LogFSRAMTest fs;
+  LogFSFile file = fs.createFile(defaultName);
 
-//bool fileNotOpened() {
-//  LogFSRAMTest fs;
-//
-//  LogFSFile file = fs.createFile(longName);
-//
-//  return file.write((uint8_t*)defaultLogs, strlen(defaultLogs)) == LOGFS_ERR_FILE_NOT_OPENED;
-//}
-//
+  return file.write((uint8_t*)defaultLogs, strlen(defaultLogs)) == LOGFS_OK;
+}
+
+bool fileNotOpened() {
+  LogFSRAMTest fs;
+
+  LogFSFile file = fs.createFile(longName);
+
+  return file.write((uint8_t*)defaultLogs, strlen(defaultLogs)) == LOGFS_ERR_FILE_NOT_OPENED;
+}
+
 //bool readFile() {
 //  LogFSRAMTest fs;
 //
@@ -197,22 +193,18 @@ bool getAvailableSize() {
   return fs.getAvailableSize() == fs.getTotalSize() - fs.getUsedSize();
 }
 
-//bool releasePages() {
-//  LogFSRAMTest fs;
-//
-//  uint32_t sizeBefore = fs.getAvailableSize();
-//
-//  fs.createFile(defaultName);
-//
-//  uint32_t sizeInTheMiddle = fs.getAvailableSize();
-//
-//
-//  fs.deleteFile(defaultName);
-//
-//  uint32_t sizeAfter = fs.getAvailableSize();
-//  return sizeBefore == sizeAfter && sizeInTheMiddle != sizeAfter;
-//}
-//
+bool releaseSectors() {
+  LogFSRAMTest fs;
+
+  uint32_t sizeBefore = fs.getAvailableSize();
+  fs.createFile(defaultName);
+  uint32_t sizeInTheMiddle = fs.getAvailableSize();
+  fs.deleteFile(defaultName);
+  uint32_t sizeAfter = fs.getAvailableSize();
+
+  return sizeBefore == sizeAfter && sizeInTheMiddle != sizeAfter;
+}
+
 //bool readEmptyFiles() {
 //  LogFSRAMTest fs;
 //
@@ -260,8 +252,8 @@ void testFile() {
   test("open deleted file", openDeletedFile());
   test("file not exist", fileNotExist());
   test("file exist", fileExist());
-//  test("write file", writeFile());
-//  test("file not opened", fileNotOpened());
+  test("write file", writeFile());
+  test("file not opened", fileNotOpened());
 //  test("write and read file", readFile());
 //  test("write and read two files", readTwoFile());
 //  test("write and read more than page size", writeAndReadMoreThanPageSize());
@@ -270,7 +262,7 @@ void testFile() {
   test("get total size", getTotalSize());
   test("get used size", getUsedSize());
   test("get available size", getAvailableSize());
-//  test("release pages", releasePages());
+  test("release pages", releaseSectors());
 //  test("read empty files list", readEmptyFiles());
 //  test("read created files list", readCreatedFiles());
 //  test("check write size", checkWriteSize());
