@@ -15,6 +15,12 @@ char secondLogs[] = "another logs line";
 
 // --- TESTS ---
 
+bool createFile() {
+  LogFSRAMTest fs;
+
+  return fs.createFile(defaultName).getStatus() == LOGFS_OK;
+}
+
 bool createLongNameFile() {
   LogFSRAMTest fs;
 
@@ -253,6 +259,7 @@ bool createLongNameFile() {
 void testFile() {
   cout << "File:" << endl;
 
+  test("create file", createFile());
   test("create long name file", createLongNameFile());
 //  test("reach max files limit", reachMaxFilesLimit());
 //  test("open file not exist", openFileNotExist());

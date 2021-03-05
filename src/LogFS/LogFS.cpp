@@ -157,7 +157,7 @@ LogFSFile LogFS::createFile(char* name) {
 
   // look for free sector
   uint32_t sectorFlagsSize = sizeof(struct LogFSSectorFlags);
-  uint16_t sectorsOffset = _header.sectorsStartAddress / _header.sectorSize;
+  uint16_t sectorsIndexOffset = _header.sectorsStartAddress / _header.sectorSize;
 
   uint8_t page[_header.pageSize];
   uint32_t readSectorIndex = 0;
@@ -165,7 +165,8 @@ LogFSFile LogFS::createFile(char* name) {
   int32_t freeSectorIndex = 0;
 
   for (uint32_t i = 0; i < _header.sectorsAmount; i++) {
-    uint32_t sectorIndex = i / _header.sectorSize + sectorsOffset;
+    uint32_t sectorIndex =
+      i / _header.sectorSize + _header.sectorsMapStartAddress / _header.sectorSize;
     uint16_t pageIndex = i % _header.sectorSize / _header.pageSize;
 
     if (sectorIndex != readSectorIndex || pageIndex != readPageIndex) {
@@ -178,7 +179,7 @@ LogFSFile LogFS::createFile(char* name) {
     sectorFlags.flags = page[i];
 
     if (sectorFlags.isEmpty()) {
-      freeSectorIndex = i;
+      freeSectorIndex = i + sectorsIndexOffset;
       sectorFlags.removeFlags(LOGFS_EMPTY_SECTOR);
       sectorFlags.addFlags(LOGFS_FILE_START_SECTOR);
       _fio->writeBytes(sectorIndex, pageIndex, offset, &sectorFlags, sectorFlagsSize);
