@@ -15,7 +15,7 @@ LogFS::LogFS(FlashIO *fio) {
 }
 
 uint32_t LogFS::getPageIndex(uint32_t offset) {
-  return offset / _header.sectorSize;
+  return offset / _header.pageSize;
 }
 
 uint32_t LogFS::allocateSector(uint8_t flags) {
@@ -48,6 +48,9 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
       freeSectorIndex = i + sectorsIndexOffset;
       sectorFlags.flags = flags;
       _sectorsUsed++;
+
+//      cout << "allocate sector: " << freeSectorIndex << endl;
+
       _fio->writeBytes(sectorIndex, pageIndex, offset, &sectorFlags, sectorFlagsSize);
       break;
     }
@@ -72,6 +75,9 @@ void LogFS::releaseSector(uint32_t sectorIndex) {
 
   LogFSSectorFlags sectorFlags;
   sectorFlags.flags = 0;
+
+//  cout << "release sector: " << sectorIndex << endl;
+
   _sectorsUsed--;
   _fio->writeBytes(sectorsMapSectorIndex, sectorsMapPageIndex, sectorsMapOffset, &sectorFlags,
                    sectorFlagsSize);

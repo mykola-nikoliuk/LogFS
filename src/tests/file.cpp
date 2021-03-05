@@ -96,52 +96,56 @@ bool fileNotOpened() {
   return file.write((uint8_t*)defaultLogs, strlen(defaultLogs)) == LOGFS_ERR_FILE_NOT_OPENED;
 }
 
-//bool readFile() {
-//  LogFSRAMTest fs;
-//
-//  uint8_t logsLength = strlen(defaultLogs) + 1;
-//  LogFSFile file = fs.createFile(defaultName);
-//  file.write((uint8_t*)defaultLogs, logsLength);
-//
-//  char buffer[logsLength];
-//  file.read((uint8_t*)buffer, logsLength);
-//
-//  return strcmp(buffer, defaultLogs) == 0;
-//}
-//
-//bool readTwoFile() {
-//  LogFSRAMTest fs;
-//
-//  uint8_t logsLength1 = strlen(defaultLogs) + 1;
-//  uint8_t logsLength2 = strlen(secondLogs) + 1;
-//  LogFSFile file1 = fs.createFile(defaultName);
-//  LogFSFile file2 = fs.createFile(secondFileName);
-//  file1.write((uint8_t*)defaultLogs, logsLength1);
-//  file2.write((uint8_t*)secondLogs, logsLength2);
-//
-//  char buffer1[logsLength1];
-//  char buffer2[logsLength2];
-//  file1.read((uint8_t*)buffer1, logsLength1);
-//  file2.read((uint8_t*)buffer2, logsLength2);
-//
-//  return strcmp(buffer1, defaultLogs) == 0 && strcmp(buffer2, secondLogs) == 0;
-//}
-//
-//bool writeAndReadMoreThanPageSize() {
-//  LogFSRAMTest fs(1024);
-//
-//  char log[] = "log that longer then page size";
-//  uint16_t logSize = strlen(log) + 1;
-//
-//  LogFSFile file = fs.createFile(defaultName);
-//  file.write((uint8_t*)log, logSize);
-//
-//  char buffer[logSize];
-//  file.read((uint8_t*)buffer, logSize);
-//
-//  return strcmp(buffer, log) == 0;
-//}
-//
+bool readFile() {
+  LogFSRAMTest fs;
+
+  uint8_t logsLength = strlen(defaultLogs) + 1;
+  LogFSFile file = fs.createFile(defaultName);
+
+  file.write(defaultLogs, logsLength);
+  char buffer[logsLength];
+  file.read(buffer, logsLength);
+
+  return strcmp(buffer, defaultLogs) == 0;
+}
+
+bool readTwoFiles() {
+  LogFSRAMTest fs;
+
+  uint8_t logsLength1 = strlen(defaultLogs) + 1;
+  uint8_t logsLength2 = strlen(secondLogs) + 1;
+  LogFSFile file1 = fs.createFile(defaultName);
+  LogFSFile file2 = fs.createFile(secondFileName);
+  file1.write((uint8_t*)defaultLogs, logsLength1);
+  file2.write((uint8_t*)secondLogs, logsLength2);
+
+  char buffer1[logsLength1];
+  char buffer2[logsLength2];
+  file1.read((uint8_t*)buffer1, logsLength1);
+  file2.read((uint8_t*)buffer2, logsLength2);
+
+  return strcmp(buffer1, defaultLogs) == 0 && strcmp(buffer2, secondLogs) == 0;
+}
+
+bool writeAndReadMoreThanPageSize() {
+  LogFSRAMTest fs;
+
+  uint16_t logSize = PAGE_SIZE * 2 + 24;
+  char log[logSize];
+  for (uint16_t i = 0; i < logSize; i++) {
+    log[i] = i + 48;
+  }
+  log[logSize - 1] = '\0';
+
+  LogFSFile file = fs.createFile(defaultName);
+  file.write((uint8_t*)log, logSize);
+
+  char buffer[logSize];
+  file.read((uint8_t*)buffer, logSize);
+
+  return strcmp(buffer, log) == 0;
+}
+
 //bool writeByChunks() {
 //  LogFSRAMTest fs;
 //
@@ -254,9 +258,9 @@ void testFile() {
   test("file exist", fileExist());
   test("write file", writeFile());
   test("file not opened", fileNotOpened());
-//  test("write and read file", readFile());
-//  test("write and read two files", readTwoFile());
-//  test("write and read more than page size", writeAndReadMoreThanPageSize());
+  test("write and read file", readFile());
+  test("write and read two files", readTwoFiles());
+  test("write and read more than page size", writeAndReadMoreThanPageSize());
 //  test("write by chunks", writeByChunks());
 //  test("read by chunks", readByChunks());
   test("get total size", getTotalSize());
