@@ -35,8 +35,8 @@ class LogFS {
     LogFSFile createFile(char* name);
     LogFSFile openFile(char* name);
     uint8_t deleteFile(char* name);
-//    bool exist(char* name);
-//
+    bool exist(char* name);
+
 //    uint32_t getTotalSize();
 //    uint32_t getAvailableSize();
 //    uint32_t getUsedSize();

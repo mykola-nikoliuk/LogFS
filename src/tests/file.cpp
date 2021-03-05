@@ -47,40 +47,40 @@ bool createAndDeleteFile() {
   return fs.deleteFile(defaultName) == LOGFS_OK;
 }
 
-//bool deleteFileNotExist() {
-//  LogFSRAMTest fs;
-//
-//  return fs.deleteFile(defaultName) == LOGFS_ERR_FILE_NOT_FOUND;
-//}
-//
-//bool deleteLongNameFile() {
-//  LogFSRAMTest fs;
-//
-//  return fs.deleteFile(longName) == LOGFS_ERR_LONG_FILE_NAME;
-//}
-//
-//bool openDeletedFile() {
-//  LogFSRAMTest fs;
-//
-//  fs.createFile(defaultName);
-//  fs.deleteFile(defaultName);
-//
-//  return fs.openFile(defaultName).getStatus() == LOGFS_ERR_FILE_NOT_FOUND;
-//}
-//
-//bool fileNotExist() {
-//  LogFSRAMTest fs;
-//
-//  return !fs.exist(defaultName);
-//}
-//
-//bool fileExist() {
-//  LogFSRAMTest fs;
-//
-//  fs.createFile(defaultName);
-//  return fs.exist(defaultName);
-//}
-//
+bool deleteFileNotExist() {
+  LogFSRAMTest fs;
+
+  return fs.deleteFile(defaultName) == LOGFS_ERR_FILE_NOT_FOUND;
+}
+
+bool deleteLongNameFile() {
+  LogFSRAMTest fs;
+
+  return fs.deleteFile(longName) == LOGFS_ERR_LONG_FILE_NAME;
+}
+
+bool openDeletedFile() {
+  LogFSRAMTest fs;
+
+  fs.createFile(defaultName);
+  fs.deleteFile(defaultName);
+
+  return fs.openFile(defaultName).getStatus() == LOGFS_ERR_FILE_NOT_FOUND;
+}
+
+bool fileNotExist() {
+  LogFSRAMTest fs;
+
+  return !fs.exist(defaultName);
+}
+
+bool fileExist() {
+  LogFSRAMTest fs;
+
+  fs.createFile(defaultName);
+  return fs.exist(defaultName);
+}
+
 //bool writeFile() {
 //  LogFSRAMTest fs;
 //
@@ -255,12 +255,12 @@ void testFile() {
   test("open file not exist", openFileNotExist());
   test("create and open", createAndOpenFile());
   test("create and delete file", createAndDeleteFile());
-//  test("delete file not exist", deleteFileNotExist());
-//  test("delete long name file", deleteLongNameFile());
-//  test("open deleted file", openDeletedFile());
-//  test("file not exist", fileNotExist());
-//  test("file exist", fileExist());
-//  test("write file", writeFile());
+  test("delete file not exist", deleteFileNotExist());
+  test("delete long name file", deleteLongNameFile());
+  test("open deleted file", openDeletedFile());
+  test("file not exist", fileNotExist());
+  test("file exist", fileExist());
+//  test("write file", writeFi˚le());
 //  test("file not opened", fileNotOpened());
 //  test("write and read file", readFile());
 //  test("write and read two files", readTwoFile());

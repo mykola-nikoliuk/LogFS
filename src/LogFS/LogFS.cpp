@@ -269,16 +269,17 @@ uint8_t LogFS::deleteFile(char *name) {
   return LOGFS_OK;
 }
 
-//bool LogFS::exist(char* name) {
-//  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return false;
-//
-//  LogFSSectorFlags tableFile;
-//  // look for table file
-//  if(!fillTableFile(name, &tableFile)) return false;
-//
-//  return true;
-//}
-//
+bool LogFS::exist(char* name) {
+  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return false;
+
+  LogFSFileHeader fileHeader;
+
+  // look for table file
+  uint32_t sectorIndex = readFileHeader(name, &fileHeader);
+
+  return sectorIndex > 0;
+}
+
 //uint32_t LogFS::getTotalSize() {
 //  // TODO: check for init
 //
