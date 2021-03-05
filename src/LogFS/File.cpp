@@ -77,12 +77,6 @@ uint8_t LogFSFile::write(void* data, uint32_t length) {
     setLastSectorOffset(0);
     uint32_t newSectorIndex = _fs->allocateSector(LOGFS_ACTIVE_SECTOR);
 
-//    cout << endl << "add new sector to file" << endl;
-//    cout << "sector: " << _lastSectorIndex << endl;
-//    cout << "page: " << lastPageIndex << endl;
-//    cout << "offset: " << pageSize - sectorAddressSize << endl;
-//    cout << "len: " << sectorAddressSize << endl << endl;
-
     _fs->_fio->writeBytes(
       _lastSectorIndex,
       lastPageIndex,
@@ -91,6 +85,8 @@ uint8_t LogFSFile::write(void* data, uint32_t length) {
       sectorAddressSize
     );
     _lastSectorIndex = newSectorIndex;
+
+//    cout << endl << "add new sector: " << newSectorIndex << endl;
 
     write(&pData[totalWrote], length - totalWrote);
   }

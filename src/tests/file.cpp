@@ -146,36 +146,55 @@ bool writeAndReadMoreThanPageSize() {
   return strcmp(buffer, log) == 0;
 }
 
-//bool writeByChunks() {
-//  LogFSRAMTest fs;
-//
-//  char logs[] = "12345678\n";
-//  LogFSFile file = fs.createFile(defaultName);
-//  uint8_t chunkSize = 3;
-//  for (uint8_t i = 0; i < strlen(logs); i += chunkSize) {
-//    file.write((uint8_t*)(logs + i), chunkSize);
-//  }
-//  char buffer[strlen(logs)];
-//  file.read((uint8_t*)buffer, strlen(logs));
-//
-//  return strcmp(buffer, logs);
-//}
-//
-//bool readByChunks() {
-//  LogFSRAMTest fs;
-//
-//  char logs[] = "12345678\n";
-//  LogFSFile file = fs.createFile(defaultName);
-//  uint8_t chunkSize = 3;
-//  file.write((uint8_t*)logs, strlen(logs));
-//  char buffer[strlen(logs)];
-//
-//  for (uint8_t i = 0; i < strlen(logs); i += chunkSize) {
-//    file.read((uint8_t*)(buffer + i), chunkSize);
-//  }
-//
-//  return strcmp(buffer, logs);
-//}
+bool writeAndReadMoreThanSectorSize() {
+  LogFSRAMTest fs;
+
+  uint16_t logSize = SECTOR_SIZE * 2 + 24;
+  char log[logSize];
+  for (uint16_t i = 0; i < logSize; i++) {
+    log[i] = i + 48;
+  }
+  log[logSize - 1] = '\0';
+
+  LogFSFile file = fs.createFile(defaultName);
+  file.write((uint8_t*)log, logSize);
+
+  char buffer[logSize];
+  file.read((uint8_t*)buffer, logSize);
+
+  return strcmp(buffer, log) == 0;
+}
+
+bool writeByChunks() {
+  LogFSRAMTest fs;
+
+  char logs[] = "12345678\n";
+  LogFSFile file = fs.createFile(defaultName);
+  uint8_t chunkSize = 3;
+  for (uint8_t i = 0; i < strlen(logs); i += chunkSize) {
+    file.write((uint8_t*)(logs + i), chunkSize);
+  }
+  char buffer[strlen(logs)];
+  file.read((uint8_t*)buffer, strlen(logs));
+
+  return strcmp(buffer, logs);
+}
+
+bool readByChunks() {
+  LogFSRAMTest fs;
+
+  char logs[] = "12345678\n";
+  LogFSFile file = fs.createFile(defaultName);
+  uint8_t chunkSize = 3;
+  file.write((uint8_t*)logs, strlen(logs));
+  char buffer[strlen(logs)];
+
+  for (uint8_t i = 0; i < strlen(logs); i += chunkSize) {
+    file.read((uint8_t*)(buffer + i), chunkSize);
+  }
+
+  return strcmp(buffer, logs);
+}
 
 bool getTotalSize() {
   LogFSRAMTest fs;
@@ -261,8 +280,9 @@ void testFile() {
   test("write and read file", readFile());
   test("write and read two files", readTwoFiles());
   test("write and read more than page size", writeAndReadMoreThanPageSize());
-//  test("write by chunks", writeByChunks());
-//  test("read by chunks", readByChunks());
+  test("write and read more than sector size", writeAndReadMoreThanSectorSize());
+  test("write by chunks", writeByChunks());
+  test("read by chunks", readByChunks());
   test("get total size", getTotalSize());
   test("get used size", getUsedSize());
   test("get available size", getAvailableSize());
