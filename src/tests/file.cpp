@@ -91,7 +91,7 @@ bool fileExist() {
 //
 //  return strcmp(pagesStart, defaultLogs) == 0;
 //}
-//
+
 //bool fileNotOpened() {
 //  LogFSRAMTest fs;
 //
@@ -176,27 +176,27 @@ bool fileExist() {
 //
 //  return strcmp(buffer, logs);
 //}
-//
-//bool getTotalSize() {
-//  LogFSRAMTest fs;
-//  return fs.getTotalSize() > 0;
-//}
-//
-//bool getUsedSize() {
-//  uint16_t pageSize = 256;
-//  LogFSRAMTest fs;
-//  fs.createFile(defaultName);
-//
-//  return fs.getUsedSize() == pageSize - sizeof(fs.getHeader()->sectorsAmount);
-//}
-//
-//bool getAvailableSize() {
-//  LogFSRAMTest fs;
-//  fs.createFile(defaultName);
-//
-//  return fs.getAvailableSize() == fs.getTotalSize() - fs.getUsedSize();
-//}
-//
+
+bool getTotalSize() {
+  LogFSRAMTest fs;
+  return fs.getTotalSize() > 0;
+}
+
+bool getUsedSize() {
+  LogFSRAMTest fs;
+  fs.createFile(defaultName);
+  fs.createFile(secondFileName);
+
+  return fs.getUsedSize() == fs.getHeader()->sectorSize * 2;
+}
+
+bool getAvailableSize() {
+  LogFSRAMTest fs;
+  fs.createFile(defaultName);
+
+  return fs.getAvailableSize() == fs.getTotalSize() - fs.getUsedSize();
+}
+
 //bool releasePages() {
 //  LogFSRAMTest fs;
 //
@@ -260,16 +260,16 @@ void testFile() {
   test("open deleted file", openDeletedFile());
   test("file not exist", fileNotExist());
   test("file exist", fileExist());
-//  test("write file", writeFi˚le());
+//  test("write file", writeFile());
 //  test("file not opened", fileNotOpened());
 //  test("write and read file", readFile());
 //  test("write and read two files", readTwoFile());
 //  test("write and read more than page size", writeAndReadMoreThanPageSize());
 //  test("write by chunks", writeByChunks());
 //  test("read by chunks", readByChunks());
-//  test("get total size", getTotalSize());
-//  test("get used size", getUsedSize());
-//  test("get available size", getAvailableSize());
+  test("get total size", getTotalSize());
+  test("get used size", getUsedSize());
+  test("get available size", getAvailableSize());
 //  test("release pages", releasePages());
 //  test("read empty files list", readEmptyFiles());
 //  test("read created files list", readCreatedFiles());

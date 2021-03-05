@@ -14,7 +14,7 @@ class LogFS {
   private:
     LogFSHeader _header;
     FlashIO* _fio;
-    uint16_t _pagesUsed;
+    uint32_t _sectorsUsed;
 
 //    uint32_t writeEmptyFileTable(uint32_t address, uint16_t filesAmount);
 //    void clearPages(uint32_t address, uint16_t sectorsAmount);
@@ -37,10 +37,10 @@ class LogFS {
     uint8_t deleteFile(char* name);
     bool exist(char* name);
 
-//    uint32_t getTotalSize();
-//    uint32_t getAvailableSize();
-//    uint32_t getUsedSize();
-//
+    uint32_t getTotalSize();
+    uint32_t getAvailableSize();
+    uint32_t getUsedSize();
+
 //    LogFSDirectory readFiles();
 
     LogFSHeader* getHeader() { return &_header; }

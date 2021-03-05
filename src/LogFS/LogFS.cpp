@@ -66,6 +66,7 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
     if (sectorFlags.isEmpty()) {
       freeSectorIndex = i + sectorsIndexOffset;
       sectorFlags.flags = flags;
+      _sectorsUsed++;
       _fio->writeBytes(sectorIndex, pageIndex, offset, &sectorFlags, sectorFlagsSize);
       break;
     }
@@ -90,6 +91,7 @@ void LogFS::releaseSector(uint32_t sectorIndex) {
 
   LogFSSectorFlags sectorFlags;
   sectorFlags.flags = 0;
+  _sectorsUsed--;
   _fio->writeBytes(sectorsMapSectorIndex, sectorsMapPageIndex, sectorsMapOffset, &sectorFlags,
                    sectorFlagsSize);
   _fio->resetSector(sectorIndex);
@@ -158,7 +160,7 @@ uint8_t LogFS::init() {
     return LOGFS_ERR_DIFFERENT_VERSION;
   }
 
-  _pagesUsed = getPagesUsed();
+  _sectorsUsed = getPagesUsed();
 
   return LOGFS_OK;
 }
@@ -280,29 +282,24 @@ bool LogFS::exist(char* name) {
   return sectorIndex > 0;
 }
 
-//uint32_t LogFS::getTotalSize() {
-//  // TODO: check for init
-//
-//  uint16_t pageBodySize = _header.pageSize - sizeof(_header.sectorsAmount);
-//  return _header.sectorsAmount * pageBodySize;
-//}
-//
-//uint32_t LogFS::getAvailableSize() {
-//  // TODO: check for init
-//
-//  uint16_t pageBodySize = _header.pageSize - sizeof(_header.sectorsAmount);
-//  uint32_t totalSize = getTotalSize();
-//  return totalSize - _pagesUsed * pageBodySize;
-//}
-//
-//uint32_t LogFS::getUsedSize() {
-//  // TODO: check for init
-//
-//  uint16_t pageBodySize = _header.pageSize - sizeof(_header.sectorsAmount);
-//  uint32_t totalSize = getTotalSize();
-//  return totalSize - (_header.sectorsAmount - _pagesUsed) * pageBodySize;
-//}
-//
+uint32_t LogFS::getTotalSize() {
+  // TODO: check for init
+
+  return _header.sectorsAmount * _header.sectorSize;
+}
+
+uint32_t LogFS::getAvailableSize() {
+  // TODO: check for init
+
+  return (_header.sectorsAmount - _sectorsUsed) * _header.sectorSize;
+}
+
+uint32_t LogFS::getUsedSize() {
+  // TODO: check for init
+
+  return _sectorsUsed * _header.sectorSize;
+}
+
 //LogFSDirectory LogFS::readFiles() {
 //  // TODO: check for init
 //  return LogFSDirectory(this);
