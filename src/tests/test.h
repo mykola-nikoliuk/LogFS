@@ -10,10 +10,8 @@
 #define MAX_MEMORY_SIZE 16 * SECTOR_SIZE
 
 struct RAMFlashIO : public FlashIO {
-  RAMFlashIO(uint32_t capacity = MAX_MEMORY_SIZE, uint16_t sectorSize = SECTOR_SIZE, uint16_t pageSize = PAGE_SIZE) :
-    FlashIO(capacity, sectorSize, pageSize) {
-
-  };
+  RAMFlashIO(uint32_t capacity = MAX_MEMORY_SIZE, uint16_t sectorSize = SECTOR_SIZE,
+             uint16_t pageSize = PAGE_SIZE) : FlashIO(capacity, sectorSize, pageSize) {};
 
   uint8_t data[MAX_MEMORY_SIZE];
 

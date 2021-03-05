@@ -6,7 +6,7 @@
 #include "config.h"
 
 #define LOGFS_EMPTY_SECTOR 1
-#define LOGFS_DELETED_SECTOR 2
+#define LOGFS_ACTIVE_SECTOR 2
 #define LOGFS_FILE_START_SECTOR 4
 
 struct LogFSSectorFlags {
@@ -17,7 +17,7 @@ struct LogFSSectorFlags {
   }
 
   bool isDeleted() {
-    return flags & LOGFS_DELETED_SECTOR;
+    return !(flags & LOGFS_ACTIVE_SECTOR);
   }
 
   bool isFileStart() {

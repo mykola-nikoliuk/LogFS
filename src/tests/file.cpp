@@ -27,28 +27,19 @@ bool createLongNameFile() {
   return fs.createFile(longName).getStatus() == LOGFS_ERR_LONG_FILE_NAME;
 }
 
-//bool reachMaxFilesLimit() {
-//  LogFSRAMTest fs(2);
-//
-//  fs.createFile(defaultName);
-//  fs.createFile(defaultName);
-//
-//  return fs.createFile(defaultName).getStatus() == LOGFS_ERR_LOW_SPACE_FILE_TABLE;
-//}
-//
-//bool openFileNotExist() {
-//  LogFSRAMTest fs;
-//
-//  return fs.openFile(defaultName).getStatus() == LOGFS_ERR_FILE_NOT_FOUND;
-//}
-//
-//bool createAndOpenFile() {
-//  LogFSRAMTest fs;
-//
-//  fs.createFile(defaultName);
-//  return fs.openFile(defaultName).getStatus() == LOGFS_OK;
-//}
-//
+bool openFileNotExist() {
+  LogFSRAMTest fs;
+
+  return fs.openFile(defaultName).getStatus() == LOGFS_ERR_FILE_NOT_FOUND;
+}
+
+bool createAndOpenFile() {
+  LogFSRAMTest fs;
+
+  fs.createFile(defaultName);
+  return fs.openFile(defaultName).getStatus() == LOGFS_OK;
+}
+
 //bool createAndDeleteFile() {
 //  LogFSRAMTest fs;
 //
@@ -261,9 +252,8 @@ void testFile() {
 
   test("create file", createFile());
   test("create long name file", createLongNameFile());
-//  test("reach max files limit", reachMaxFilesLimit());
-//  test("open file not exist", openFileNotExist());
-//  test("create and open", createAndOpenFile());
+  test("open file not exist", openFileNotExist());
+  test("create and open", createAndOpenFile());
 //  test("create and delete file", createAndDeleteFile());
 //  test("delete file not exist", deleteFileNotExist());
 //  test("delete long name file", deleteLongNameFile());
