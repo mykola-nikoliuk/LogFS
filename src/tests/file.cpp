@@ -40,13 +40,13 @@ bool createAndOpenFile() {
   return fs.openFile(defaultName).getStatus() == LOGFS_OK;
 }
 
-//bool createAndDeleteFile() {
-//  LogFSRAMTest fs;
-//
-//  fs.createFile(defaultName);
-//  return fs.deleteFile(defaultName) == LOGFS_OK;
-//}
-//
+bool createAndDeleteFile() {
+  LogFSRAMTest fs;
+
+  fs.createFile(defaultName);
+  return fs.deleteFile(defaultName) == LOGFS_OK;
+}
+
 //bool deleteFileNotExist() {
 //  LogFSRAMTest fs;
 //
@@ -254,7 +254,7 @@ void testFile() {
   test("create long name file", createLongNameFile());
   test("open file not exist", openFileNotExist());
   test("create and open", createAndOpenFile());
-//  test("create and delete file", createAndDeleteFile());
+  test("create and delete file", createAndDeleteFile());
 //  test("delete file not exist", deleteFileNotExist());
 //  test("delete long name file", deleteLongNameFile());
 //  test("open deleted file", openDeletedFile());

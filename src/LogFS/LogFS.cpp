@@ -10,7 +10,7 @@
 
 using namespace std;
 
-LogFS::LogFS(FlashIO* fio) {
+LogFS::LogFS(FlashIO *fio) {
   _fio = fio;
 }
 //
@@ -74,17 +74,28 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
   return freeSectorIndex;
 }
 
-//void LogFS::releasePage(uint16_t pageIndex) {
-//  _pagesUsed--;
-//  uint16_t pageBlockIndex = pageIndex / 8;
-//  uint8_t pageBlockBit = 8 - pageIndex % 8 - 1;
-//
-//  uint8_t state = _fio->readByte(_header.sectorsMapStartAddress + pageBlockIndex);
-//  state |= 1 << pageBlockBit;
-//  _fio->writeByte(_header.sectorsMapStartAddress + pageBlockIndex, state);
-//}
+void LogFS::releaseSector(uint32_t sectorIndex) {
+  if (sectorIndex < _header.sectorsStartAddress / _header.sectorSize) return;
 
-uint32_t LogFS::readFileHeader(char* name, LogFSFileHeader* fileHeader) {
+  uint16_t sectorFlagsSize = sizeof(struct LogFSSectorFlags);
+  uint16_t flagsPerSector = _header.sectorSize / sectorFlagsSize;
+  uint16_t flagsPerPage = _header.pageSize / sectorFlagsSize;
+
+  uint32_t sectorsMapSectorIndex = sectorIndex / flagsPerSector;
+  uint32_t sectorsMapPageIndex =
+    sectorIndex - (sectorsMapSectorIndex * flagsPerSector) / flagsPerPage;
+  uint32_t sectorsMapOffset = (sectorIndex - (sectorsMapSectorIndex * flagsPerSector) -
+                               (sectorsMapPageIndex * flagsPerPage)) % _header.pageSize *
+                              sectorFlagsSize;
+
+  LogFSSectorFlags sectorFlags;
+  sectorFlags.flags = 0;
+  _fio->writeBytes(sectorsMapSectorIndex, sectorsMapPageIndex, sectorsMapOffset, &sectorFlags,
+                   sectorFlagsSize);
+  _fio->resetSector(sectorIndex);
+}
+
+uint32_t LogFS::readFileHeader(char *name, LogFSFileHeader *fileHeader) {
   LogFSFileHeader localFileHeader;
 
   uint32_t fileHeaderSize = sizeof(struct LogFSFileHeader);
@@ -137,7 +148,7 @@ uint16_t LogFS::getPagesUsed() {
 // --- PUBLIC ---
 
 uint8_t LogFS::init() {
-  _fio->readBytes(0, 0, 0, (uint8_t*)&_header, sizeof(struct LogFSHeader));
+  _fio->readBytes(0, 0, 0, (uint8_t * ) & _header, sizeof(struct LogFSHeader));
 
   if (strcmp(_header.name, LogFS_NAME)) {
     return LOGFS_ERR_NOT_FORMATTED;
@@ -158,7 +169,7 @@ uint8_t LogFS::format() {
   uint16_t pageSize = _fio->getPageSize();
 
   uint16_t headerSize = sectorSize;
-  uint16_t sectorsMapSize = ceil(capacity / sectorSize / float (sectorSize)) * sectorSize;
+  uint16_t sectorsMapSize = ceil(capacity / sectorSize / float(sectorSize)) * sectorSize;
 
   if (capacity < headerSize) return LOGFS_ERR_LOW_SPACE_HEADER;
   if (capacity < headerSize + sectorsMapSize) return LOGFS_ERR_LOW_SPACE_SECTORS_MAP;
@@ -180,13 +191,13 @@ uint8_t LogFS::format() {
   // start format memory
   _fio->resetChip();
   // header
-  _fio->writeBytes(0, 0, 0, (uint8_t*)&header, sizeof(struct LogFSHeader));
+  _fio->writeBytes(0, 0, 0, (uint8_t * ) & header, sizeof(struct LogFSHeader));
   // not need to write sectors map, it's already empty after chip reset
 
   return LOGFS_OK;
 }
 
-LogFSFile LogFS::createFile(char* name) {
+LogFSFile LogFS::createFile(char *name) {
   if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LogFSFile(LOGFS_ERR_LONG_FILE_NAME);
 
   // look for free sector
@@ -208,7 +219,7 @@ LogFSFile LogFS::createFile(char* name) {
   return LogFSFile(this, freeSectorIndex);
 }
 
-LogFSFile LogFS::openFile(char* name) {
+LogFSFile LogFS::openFile(char *name) {
   if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LogFSFile(LOGFS_ERR_LONG_FILE_NAME);
 
   LogFSFileHeader fileHeader;
@@ -222,31 +233,42 @@ LogFSFile LogFS::openFile(char* name) {
   return LogFSFile(this, sectorIndex);
 }
 
-//uint8_t LogFS::deleteFile(char* name) {
-//  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LOGFS_ERR_LONG_FILE_NAME;
-//
-//  LogFSSectorFlags tableFile;
-//
-//  // look for table file
-//  uint32_t tableFileAddress = fillTableFile(name, &tableFile);
-//  if (!tableFileAddress) return LOGFS_ERR_FILE_NOT_FOUND;
-//
-//  uint16_t pageIndex = tableFile.firstPageIndex;
-//  uint16_t pageBodySize = _header.pageSize - sizeof(_header.sectorsAmount);
-//
-//  while (true) {
-//    releasePage(pageIndex);
-//    if (pageIndex == tableFile.lastPageIndex) break;
-//
-//    tableFile.firstPageIndex = pageIndex = _fio->readShort(getPageAddress(pageIndex) + pageBodySize);
-//  }
-//
-//  tableFile.isEmpty = true;
-//  _fio->writeBytes(tableFileAddress, (uint8_t*)&tableFile, sizeof(struct LogFSSectorFlags));
-//
-//  return LOGFS_OK;
-//}
-//
+uint8_t LogFS::deleteFile(char *name) {
+  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LOGFS_ERR_LONG_FILE_NAME;
+
+  LogFSFileHeader fileHeader;
+
+  // look for table file
+  uint32_t sectorIndex = readFileHeader(name, &fileHeader);
+  if (!sectorIndex) return LOGFS_ERR_FILE_NOT_FOUND;
+
+  uint8_t sectorAddressSize = sizeof(_header.sectorsAmount);
+  uint16_t sectorBodySize = _header.sectorSize - sectorAddressSize;
+
+  uint16_t previousSectorIndex = sectorIndex;
+  uint32_t nextSectorIndex;
+  uint32_t maxAddressValue = -1;
+
+  while (true) {
+    _fio->readBytes(
+      previousSectorIndex,
+      sectorBodySize / _header.pageSize,
+      sectorBodySize % _header.pageSize,
+      &nextSectorIndex,
+      sectorAddressSize
+    );
+    releaseSector(previousSectorIndex);
+
+    if (nextSectorIndex == maxAddressValue) {
+      break;
+    }
+
+    previousSectorIndex = nextSectorIndex;
+  }
+
+  return LOGFS_OK;
+}
+
 //bool LogFS::exist(char* name) {
 //  if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return false;
 //
