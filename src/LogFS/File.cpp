@@ -162,22 +162,26 @@ uint8_t LogFSFile::read(void* data, uint32_t length) {
   return LOGFS_OK;
 }
 
-//uint32_t LogFSFile::size() {
-//  if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
-//
-//  uint16_t pagesCount = 0;
-//  uint16_t pageIndex = _tableFile.firstPageIndex;
-//  uint16_t sectorBodySize = _fs->_header.pageSize - sizeof(_fs->_header.sectorsAmount);
-//
-//  while (pageIndex != _tableFile.lastPageIndex) {
-//    uint32_t address = _fs->getPageAddress(pageIndex) + sectorBodySize;
-//    pageIndex = _fs->_fio->readShort(address);
-//    pagesCount++;
-//  }
-//
-//  return _tableFile.lastPageOffset + sectorBodySize * pagesCount;
-//}
-//
+uint32_t LogFSFile::size() {
+  if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
+
+  uint16_t sectorsCount = 0;
+  uint16_t lastPageIndex = _fs->_header.sectorSize / _fs->_header.pageSize - 1;
+  uint16_t sectorAddressSize = sizeof(_fs->_header.sectorsAmount);
+  uint16_t sectorIndex = _startSectorIndex;
+  uint16_t sectorBodySize = _fs->_header.sectorSize - sectorAddressSize;
+  uint16_t pageBodySize = _fs->_header.pageSize - sectorAddressSize;
+
+  while (sectorIndex != _lastSectorIndex) {
+    uint32_t address;
+    _fs->_fio->readBytes(sectorIndex, lastPageIndex, pageBodySize, &address, sectorAddressSize);
+    sectorIndex = address;
+    sectorsCount++;
+  }
+
+  return _lastSectorOffset + sectorBodySize * (sectorsCount - 1);
+}
+
 //uint8_t LogFSFile::close() {
 //  _status = LOGFS_FILE_CLOSED;
 //  _fs->_fio->writeBytes(_tableFileAddress, (uint8_t*)&_tableFile, sizeof(struct LogFSSectorFlags));
