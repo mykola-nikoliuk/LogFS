@@ -5,12 +5,7 @@
 #define LogFS_VERSION 1
 
 // FS GLOBAL CONFIG LOGFS v1
-
-// TODO: remove
-#define HEADER_SIZE 32
 #define LogGS_FILE_NAME_LENGTH 32
-#define DEFAULT_SECTOR_SIZE 4096
-#define DEFAULT_PAGE_SIZE 256
 
 enum {
   LOGFS_OK = 0,
