@@ -116,6 +116,24 @@ bool readFile() {
   return strcmp(buffer, defaultLogs) == 0;
 }
 
+bool writeWithTwoOpen() {
+  LogFSRAMTest fs;
+
+  char logs[] = "12345678\n";
+  fs.createFile(defaultName);
+  uint8_t chunkSize = 3;
+  for (uint8_t i = 0; i < strlen(logs); i += chunkSize) {
+    LogFSFile file = fs.openFile(defaultName);
+    file.write((uint8_t*)(logs + i), chunkSize);
+  }
+  char buffer[strlen(logs)];
+
+  LogFSFile file = fs.openFile(defaultName);
+  file.read((uint8_t*)buffer, strlen(logs));
+
+  return strcmp(buffer, logs);
+}
+
 bool readTwoFiles() {
   LogFSRAMTest fs;
 
@@ -286,6 +304,7 @@ void testFile() {
   test("write file", writeFile());
   test("file not opened", fileNotOpened());
   test("write and read file", readFile());
+  test("write with two open", writeWithTwoOpen());
   test("write and read two files", readTwoFiles());
   test("write and read more than page size", writeAndReadMoreThanPageSize());
   test("write and read more than sector size", writeAndReadMoreThanSectorSize());

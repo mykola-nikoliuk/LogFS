@@ -69,6 +69,8 @@ public:
   }
 };
 
+void testStatus();
+
 void test(const char *name, bool result);
 
 #endif
