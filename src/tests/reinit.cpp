@@ -41,6 +41,17 @@ namespace ReInitNS {
     return getSecondFS(&fs).openFile(filename).getStatus() == LOGFS_OK;
   }
 
+  bool readFile() {
+    LogFSRAMTest fs;
+    fs.createFile(filename).write(body, strlen(body) + 1);
+    LogFSFile file = getSecondFS(&fs).openFile(filename);
+
+    char buffer[64];
+    file.read(buffer, file.size());
+
+    return strcmp(body, buffer) == 0;
+  }
+
   bool fileSize() {
     LogFSRAMTest fs;
     LogFSFile file = fs.createFile(filename);
@@ -68,6 +79,7 @@ namespace ReInitNS {
     test("create two files", createTwoFiles());
     test("delete files", deleteFile());
     test("open file", openFile());
+    test("read file", readFile());
     test("file size", fileSize());
     test("used size", usedSize());
   }
