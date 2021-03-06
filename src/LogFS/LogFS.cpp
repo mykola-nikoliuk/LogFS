@@ -10,8 +10,9 @@
 
 using namespace std;
 
-LogFS::LogFS(FlashIO *fio) {
+LogFS::LogFS(FlashIO *fio, bool autoInit) {
   _fio = fio;
+  if (autoInit) init();
 }
 
 uint32_t LogFS::getPageIndex(uint32_t offset) {

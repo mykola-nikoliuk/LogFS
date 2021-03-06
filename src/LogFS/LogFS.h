@@ -26,7 +26,7 @@ class LogFS {
     friend class LogFSDirectory;
 
   public:
-    LogFS(FlashIO* fio);
+    LogFS(FlashIO* fio, bool runInit = false);
 
     uint8_t init();
     uint8_t format();

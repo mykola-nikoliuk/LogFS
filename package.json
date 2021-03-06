@@ -3,13 +3,24 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "watch": {
+    "test:build-and-start": {
+      "patterns": ["src"],
+      "extensions": "cpp,h",
+      "quiet": true
+    }
+  },
   "scripts": {
-    "start": "./logfs",
     "clean": "find . -name \"*.o\" -type f -delete",
-    "build": "npm run clean && make",
-    "build-and-start": "npm run build && npm start"
+    "test:start": "./logfs",
+    "test:build": "npm run clean && make",
+    "test:build-and-start": "npm run test:build && npm run test:start",
+    "test:bbuild-and-start:watch": "npm-watch test:build-and-start"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "npm-watch": "^0.7.0"
+  }
 }

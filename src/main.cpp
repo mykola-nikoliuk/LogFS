@@ -1,10 +1,12 @@
 #include "./tests/format.h"
 #include "./tests/file.h"
-#include "./tests/interactive.h"
+//#include "./tests/interactive.h"
+#include "./tests/reinit.h"
 
 int main() {
   testFormat();
   testFile();
-  testInteractive();
+  ReInitNS::runTests();
+//  testInteractive();
 }
 
