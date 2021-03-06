@@ -15,6 +15,9 @@ private:
   uint32_t _startSectorIndex;
   uint16_t _EOFOffsetAddress;
 
+  uint32_t _lastSectorIndex;
+  uint16_t _lastSectorOffset;
+
   uint16_t _readSectorIndex;
   uint16_t _readSectorOffset;
 
@@ -23,8 +26,6 @@ private:
   void fillEOFSector();
 
 public:
-  uint32_t _lastSectorIndex;
-  uint16_t _lastSectorOffset;
   LogFSFile(LogFS *fs, uint32_t sectorIndex);
   LogFSFile(uint8_t status) {
     _status = status;
