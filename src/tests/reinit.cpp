@@ -87,13 +87,15 @@ namespace ReInitNS {
     fs.createFile(filename).write(trimmedBody, firstPartSize);
 
     LogFS fs2 = getSecondFS(&fs);
-    LogFSFile file = fs2.openFile(filename);
-    file.write(trimmedBody + firstPartSize, secondPartSize + 1);
+    LogFSFile file2 = fs2.openFile(filename);
+    file2.write(trimmedBody + firstPartSize, secondPartSize + 1);
 
     char buffer[totalSize];
-    file.read(buffer, file.size());
+    LogFS fs3 = getSecondFS(&fs);
+    LogFSFile file3 = fs3.openFile(filename);
+    file3.read(buffer, file3.size());
 
-    return file.size() == totalSize && strcmp(buffer, trimmedBody) == 0;
+    return file3.size() == totalSize && strcmp(buffer, trimmedBody) == 0;
 
   }
 

@@ -55,6 +55,7 @@ void LogFSFile::fillEOFOffset() {
 
     if (lastSectorOffset == maxSectorOffset) return;
 
+    _EOFOffsetAddress = offset + sectorOffsetSize;
     _lastSectorOffset = lastSectorOffset;
   }
 }
