@@ -31,7 +31,6 @@ public:
   uint8_t write(void* data, uint32_t length);
   uint8_t read(void* data, uint32_t length);
   uint32_t size();
-  uint8_t close();
 };
 
 #endif

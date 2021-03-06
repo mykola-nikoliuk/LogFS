@@ -14,7 +14,7 @@ LogFSFile::LogFSFile(LogFS *fs, uint32_t sectorIndex) {
 
 // TODO: should be filled
   _lastSectorIndex = sectorIndex;
-  _lastSectorOffset = _fs->_header.sectorSize - sizeof(_fs->_header.sectorsAmount);
+  _lastSectorOffset = _fs->_header.sectorSize - _fs->getSectorAddressSize();
   _readSectorIndex = sectorIndex;
   _readSectorOffset = _lastSectorOffset;
 }
@@ -31,7 +31,7 @@ uint8_t LogFSFile::write(void* data, uint32_t length) {
 
   uint16_t pageSize = _fs->_header.pageSize;
   uint16_t sectorSize = _fs->_header.sectorSize;
-  uint16_t sectorAddressSize = sizeof(_fs->_header.sectorsAmount);
+  uint16_t sectorAddressSize = _fs->getSectorAddressSize();
   uint16_t sectorBodySize = sectorSize - sectorAddressSize;
 
   // TODO: check memory is enough for write
@@ -101,7 +101,7 @@ uint8_t LogFSFile::read(void* data, uint32_t length) {
 
   uint16_t pageSize = _fs->_header.pageSize;
   uint16_t sectorSize = _fs->_header.sectorSize;
-  uint16_t sectorAddressSize = sizeof(_fs->_header.sectorsAmount);
+  uint16_t sectorAddressSize = _fs->getSectorAddressSize();
   uint16_t sectorBodySize = sectorSize - sectorAddressSize;
 
   uint16_t lastPageIndex = _fs->_header.sectorSize / pageSize - 1;
@@ -167,7 +167,7 @@ uint32_t LogFSFile::size() {
 
   uint16_t sectorsCount = 0;
   uint16_t lastPageIndex = _fs->_header.sectorSize / _fs->_header.pageSize - 1;
-  uint16_t sectorAddressSize = sizeof(_fs->_header.sectorsAmount);
+  uint16_t sectorAddressSize = _fs->getSectorAddressSize();
   uint16_t sectorIndex = _startSectorIndex;
   uint16_t sectorBodySize = _fs->_header.sectorSize - sectorAddressSize;
   uint16_t pageBodySize = _fs->_header.pageSize - sectorAddressSize;
@@ -181,10 +181,3 @@ uint32_t LogFSFile::size() {
 
   return _lastSectorOffset + sectorBodySize * (sectorsCount - 1);
 }
-
-//uint8_t LogFSFile::close() {
-//  _status = LOGFS_FILE_CLOSED;
-//  _fs->_fio->writeBytes(_tableFileAddress, (uint8_t*)&_tableFile, sizeof(struct LogFSSectorFlags));
-//
-//  return LOGFS_OK;
-//}

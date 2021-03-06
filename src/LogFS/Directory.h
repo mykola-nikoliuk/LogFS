@@ -12,14 +12,10 @@ class LogFSDirectory {
   private:
     LogFS* _fs;
     uint8_t _status;
-    uint16_t _lastFileIndex;
+    uint16_t _lastSectorIndex;
 
   public:
-    LogFSDirectory(LogFS* fs) {
-      _fs = fs;
-      _status = LOGFS_OK;
-      _lastFileIndex = 0;
-    }
+    LogFSDirectory(LogFS* fs);
     LogFSDirectory(uint8_t status) {
       _status = status;
     }

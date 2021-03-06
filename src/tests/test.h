@@ -36,18 +36,20 @@ struct RAMFlashIO : public FlashIO {
       data[address + i] = 0xFF;
     }
   };
-  virtual void writePage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t *pageData) {
+  virtual void writePage(uint32_t sectorIndex, uint16_t pageIndex, void* pageData) {
+    uint8_t* pData = (uint8_t*)pageData;
     uint16_t pageSize = getPageSize();
     uint32_t address = sectorIndex * getSectorSize() + pageIndex * pageSize;
     for (uint32_t i = 0; i < pageSize; i++) {
-      data[address + i] &= pageData[i];
+      data[address + i] &= pData[i];
     }
   };
-  virtual void readPage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t *pageData) {
+  virtual void readPage(uint32_t sectorIndex, uint16_t pageIndex, void* pageData) {
+    uint8_t* pData = (uint8_t*)pageData;
     uint16_t pageSize = getPageSize();
     uint32_t address = sectorIndex * getSectorSize() + pageIndex * pageSize;
     for (uint32_t i = 0; i < pageSize; i++) {
-      pageData[i] = data[address + i];
+      pData[i] = data[address + i];
     }
   };
 };

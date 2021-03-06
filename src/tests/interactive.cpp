@@ -3,8 +3,10 @@
 
 using namespace std;
 
+LogFSRAMTest fs;
+
 void createFile(LogFSRAMTest* fs) {
-  char buffer[16];
+  char buffer[32];
 
   cout << "Enter filename: ";
   cin >> buffer;
@@ -18,7 +20,7 @@ void createFile(LogFSRAMTest* fs) {
 }
 
 void deleteFile(LogFSRAMTest* fs) {
-  char buffer[16];
+  char buffer[32];
 
   cout << "Enter filename: ";
   cin >> buffer;
@@ -32,7 +34,7 @@ void deleteFile(LogFSRAMTest* fs) {
 }
 
 void writeFile(LogFSRAMTest* fs) {
-  char buffer[16];
+  char buffer[32];
 
   cout << "Enter filename: ";
   cin >> buffer;
@@ -43,7 +45,6 @@ void writeFile(LogFSRAMTest* fs) {
     cout << "Enter content: ";
     cin >> content;
     uint8_t writeResult = file.write((uint8_t*)&content, strlen(content));
-    file.close();
     if (writeResult == LOGFS_OK) {
       cout << "File wrote successfully" << endl;
     } else {
@@ -55,7 +56,7 @@ void writeFile(LogFSRAMTest* fs) {
 }
 
 void readFile(LogFSRAMTest* fs) {
-  char buffer[16];
+  char buffer[32];
 
   cout << "Enter filename: ";
   cin >> buffer;
@@ -75,15 +76,15 @@ void readFile(LogFSRAMTest* fs) {
 }
 
 void readFiles(LogFSRAMTest* fs) {
-  char buffer[16];
+  char buffer[32];
 
   uint8_t counter = 0;
   LogFSDirectory dir = fs->readFiles();
+
   while (true) {
-    uint8_t result = dir.next(buffer);
-    if (result) break;
+    if (dir.next(buffer) != LOGFS_OK) break;
     counter++;
-    cout << buffer << endl;
+    cout << "file: " << buffer << endl;
   }
 
   if (!counter) {
@@ -108,37 +109,36 @@ void menu() {
   cout << endl << "Enter an option: ";
 }
 
-void testInteractive() {
-  LogFSRAMTest fs;
-
+void loop() {
   char command[16];
 
-  while (true) {
-    menu();
-    cin >> command;
+  menu();
+  cin >> command;
 
-    cout << endl;
+  cout << endl;
 
-    switch(command[0]) {
-      case 49:
-        createFile(&fs);
-        break;
-      case 50:
-        deleteFile(&fs);
-        break;
-      case 51:
-        writeFile(&fs);
-        break;
-      case 52:
-        readFile(&fs);
-        break;
-      case 57:
-        readSizes(&fs);
-        break;
-      case 48:
-        readFiles(&fs);
-        break;
-    }
+  switch(command[0]) {
+    case 49:
+      createFile(&fs);
+      break;
+    case 50:
+      deleteFile(&fs);
+      break;
+    case 51:
+      writeFile(&fs);
+      break;
+    case 52:
+      readFile(&fs);
+      break;
+    case 57:
+      readSizes(&fs);
+      break;
+    case 48:
+      readFiles(&fs);
+      break;
   }
+}
 
+void testInteractive() {
+  while (true) loop();
 }

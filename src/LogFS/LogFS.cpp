@@ -125,9 +125,9 @@ uint32_t LogFS::readFileHeader(char *name, LogFSFileHeader *fileHeader) {
   return 0;
 }
 
-//uint32_t LogFS::getPageAddress(uint16_t pageIndex) {
-//  return _header.sectorsStartAddress + _header.pageSize * pageIndex;
-//}
+uint16_t LogFS::getSectorAddressSize() {
+  return sizeof(_header.sectorsAmount);
+}
 
 uint16_t LogFS::getPagesUsed() {
   // TODO: implement
@@ -231,7 +231,7 @@ uint8_t LogFS::deleteFile(char *name) {
   uint32_t sectorIndex = readFileHeader(name, &fileHeader);
   if (!sectorIndex) return LOGFS_ERR_FILE_NOT_FOUND;
 
-  uint8_t sectorAddressSize = sizeof(_header.sectorsAmount);
+  uint8_t sectorAddressSize = getSectorAddressSize();
   uint16_t sectorBodySize = _header.sectorSize - sectorAddressSize;
 
   uint16_t previousSectorIndex = sectorIndex;
@@ -272,22 +272,22 @@ bool LogFS::exist(char* name) {
 uint32_t LogFS::getTotalSize() {
   // TODO: check for init
 
-  return _header.sectorsAmount * _header.sectorSize;
+  return _header.sectorsAmount * (_header.sectorSize - getSectorAddressSize());
 }
 
 uint32_t LogFS::getAvailableSize() {
   // TODO: check for init
 
-  return (_header.sectorsAmount - _sectorsUsed) * _header.sectorSize;
+  return (_header.sectorsAmount - _sectorsUsed) * (_header.sectorSize - getSectorAddressSize());
 }
 
 uint32_t LogFS::getUsedSize() {
   // TODO: check for init
 
-  return _sectorsUsed * _header.sectorSize;
+  return _sectorsUsed * (_header.sectorSize - getSectorAddressSize());
 }
 
-//LogFSDirectory LogFS::readFiles() {
-//  // TODO: check for init
-//  return LogFSDirectory(this);
-//}
+LogFSDirectory LogFS::readFiles() {
+  // TODO: check for init
+  return LogFSDirectory(this);
+}

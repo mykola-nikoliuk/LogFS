@@ -25,8 +25,8 @@ public:
 
   virtual void resetChip() = 0;
   virtual void resetSector(uint32_t sectorIndex) = 0;
-  virtual void writePage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t* pageData) = 0;
-  virtual void readPage(uint32_t sectorIndex, uint16_t pageIndex, uint8_t* pageData) = 0;
+  virtual void writePage(uint32_t sectorIndex, uint16_t pageIndex, void* pageData) = 0;
+  virtual void readPage(uint32_t sectorIndex, uint16_t pageIndex, void* pageData) = 0;
 
   uint32_t getCapacity() { return _capacity; }
   uint16_t getSectorSize() { return _sectorSize; }

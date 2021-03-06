@@ -206,7 +206,7 @@ bool getUsedSize() {
   fs.createFile(defaultName);
   fs.createFile(secondFileName);
 
-  return fs.getUsedSize() == fs.getHeader()->sectorSize * 2;
+  return fs.getUsedSize() == (fs.getHeader()->sectorSize - sizeof(fs.getHeader()->sectorsAmount)) * 2;
 }
 
 bool getAvailableSize() {
@@ -228,28 +228,28 @@ bool releaseSectors() {
   return sizeBefore == sizeAfter && sizeInTheMiddle != sizeAfter;
 }
 
-//bool readEmptyFiles() {
-//  LogFSRAMTest fs;
-//
-//  char buffer[16];
-//
-//  return fs.readFiles().next(buffer) == LOGFS_ERR_FILE_NOT_FOUND;
-//}
-//
-//bool readCreatedFiles() {
-//  LogFSRAMTest fs;
-//
-//  fs.createFile(defaultName);
-//  fs.createFile(secondFileName);
-//
-//  char buffer1[16];
-//  char buffer2[16];
-//
-//  LogFSDirectory dir = fs.readFiles();
-//  dir.next(buffer1);
-//  dir.next(buffer2);
-//  return strcmp(buffer1, defaultName) == 0 && strcmp(buffer2, secondFileName) == 0;
-//}
+bool readEmptyFiles() {
+  LogFSRAMTest fs;
+
+  char buffer[16];
+
+  return fs.readFiles().next(buffer) == LOGFS_ERR_FILE_NOT_FOUND;
+}
+
+bool readCreatedFiles() {
+  LogFSRAMTest fs;
+
+  fs.createFile(defaultName);
+  fs.createFile(secondFileName);
+
+  char buffer1[16];
+  char buffer2[16];
+
+  LogFSDirectory dir = fs.readFiles();
+  dir.next(buffer1);
+  dir.next(buffer2);
+  return strcmp(buffer1, defaultName) == 0 && strcmp(buffer2, secondFileName) == 0;
+}
 
 bool checkWriteSize() {
 
@@ -287,8 +287,8 @@ void testFile() {
   test("get used size", getUsedSize());
   test("get available size", getAvailableSize());
   test("release pages", releaseSectors());
-//  test("read empty files list", readEmptyFiles());
-//  test("read created files list", readCreatedFiles());
+  test("read empty files list", readEmptyFiles());
+  test("read created files list", readCreatedFiles());
   test("check write size", checkWriteSize());
 
   // page release after write with full storage

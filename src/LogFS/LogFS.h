@@ -20,10 +20,10 @@ class LogFS {
     uint32_t allocateSector(uint8_t flags);
     void releaseSector(uint32_t sectorIndex);
     uint32_t readFileHeader(char* name, LogFSFileHeader* fileHeader);
-//    uint32_t getPageAddress(uint16_t pageIndex);
+    uint16_t getSectorAddressSize();
     uint16_t getPagesUsed();
     friend class LogFSFile;
-//    friend class LogFSDirectory;
+    friend class LogFSDirectory;
 
   public:
     LogFS(FlashIO* fio);
@@ -40,7 +40,7 @@ class LogFS {
     uint32_t getAvailableSize();
     uint32_t getUsedSize();
 
-//    LogFSDirectory readFiles();
+    LogFSDirectory readFiles();
 
     LogFSHeader* getHeader() { return &_header; }
 };
