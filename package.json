@@ -13,7 +13,7 @@
   "scripts": {
     "clean": "find . -name \"*.o\" -type f -delete",
     "test:start": "./logfs",
-    "test:build": "npm run clean && make",
+    "test:build": "make",
     "test:build-and-start": "npm run test:build && npm run test:start",
     "test:bbuild-and-start:watch": "npm-watch test:build-and-start"
   },

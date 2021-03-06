@@ -130,9 +130,39 @@ uint16_t LogFS::getSectorAddressSize() {
   return sizeof(_header.sectorsAmount);
 }
 
-uint16_t LogFS::getPagesUsed() {
-  // TODO: implement
-  return 0;
+uint32_t LogFS::countSectorsUsed() {
+
+  uint32_t sectorsUsed = 0;
+
+  uint16_t pageSize = _header.pageSize;
+  uint16_t sectorSize = _header.sectorSize;
+  uint16_t sectorFlagsSize = sizeof(struct LogFSSectorFlags);
+
+  uint32_t readSectorMapIndex = 0;
+  uint16_t readSectorMapPageIndex = 0;
+  uint8_t page[pageSize];
+  LogFSSectorFlags sectorFlags;
+
+  for (uint32_t sectorIndex = 0; sectorIndex < _header.sectorsAmount; sectorIndex++) {
+    uint32_t sectorMapIndex =
+      sectorIndex / (sectorSize / sectorFlagsSize) + _header.sectorsMapStartAddress / sectorSize;
+    uint16_t sectorMapPageIndex = sectorIndex / pageSize;
+    uint16_t offset = sectorIndex % pageSize;
+
+    if (readSectorMapIndex != sectorMapIndex || readSectorMapPageIndex != sectorMapPageIndex) {
+      _fio->readPage(sectorMapIndex, sectorMapPageIndex, page);
+      readSectorMapIndex = sectorMapIndex;
+      readSectorMapPageIndex = sectorMapPageIndex;
+    }
+
+    memcpy(&sectorFlags, &page[offset], sectorFlagsSize);
+
+    if (!sectorFlags.isEmpty() && !sectorFlags.isDeleted()) {
+      sectorsUsed++;
+    }
+  }
+
+  return sectorsUsed;
 }
 
 
@@ -150,7 +180,7 @@ uint8_t LogFS::init() {
     return LOGFS_ERR_DIFFERENT_VERSION;
   }
 
-  _sectorsUsed = getPagesUsed();
+  _sectorsUsed = countSectorsUsed();
 
   return LOGFS_OK;
 }
@@ -262,7 +292,7 @@ uint8_t LogFS::deleteFile(char *name) {
   return LOGFS_OK;
 }
 
-bool LogFS::exist(char* name) {
+bool LogFS::exist(char *name) {
   if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return false;
 
   LogFSFileHeader fileHeader;

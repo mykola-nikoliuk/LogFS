@@ -53,6 +53,15 @@ namespace ReInitNS {
     return file2.size() == fileSize;
   }
 
+  bool usedSize() {
+    LogFSRAMTest fs;
+
+    fs.createFile(filename).write(body, strlen(body) + 1);
+    uint32_t usedSize = fs.getUsedSize();
+
+    return getSecondFS(&fs).getUsedSize() == usedSize;
+  }
+
   void runTests() {
     cout << "Re Init:" << endl;
     test("create file", createFile());
@@ -60,6 +69,7 @@ namespace ReInitNS {
     test("delete files", deleteFile());
     test("open file", openFile());
     test("file size", fileSize());
+    test("used size", usedSize());
   }
 
 }

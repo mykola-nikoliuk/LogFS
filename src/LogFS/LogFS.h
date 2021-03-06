@@ -21,7 +21,7 @@ class LogFS {
     void releaseSector(uint32_t sectorIndex);
     uint32_t readFileHeader(char* name, LogFSFileHeader* fileHeader);
     uint16_t getSectorAddressSize();
-    uint16_t getPagesUsed();
+    uint32_t countSectorsUsed();
     friend class LogFSFile;
     friend class LogFSDirectory;
 
