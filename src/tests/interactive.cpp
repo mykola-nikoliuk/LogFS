@@ -25,11 +25,11 @@ void deleteFile(LogFSRAMTest* fs) {
   cout << "Enter filename: ";
   cin >> buffer;
 
-  LogFSFile file = fs->deleteFile(buffer);
-  if (file.getStatus() == LOGFS_OK) {
+  uint8_t status = fs->deleteFile(buffer);
+  if (status == LOGFS_OK) {
     cout << "File successfully deleted" << endl;
   } else {
-    cout << "Error: " << int(file.getStatus()) << endl;
+    cout << "Error: " << int(status) << endl;
   }
 }
 

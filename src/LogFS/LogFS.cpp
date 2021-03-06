@@ -50,8 +50,6 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
       sectorFlags.flags = flags;
       _sectorsUsed++;
 
-//      cout << "allocate sector: " << freeSectorIndex << endl;
-
       _fio->writeBytes(sectorIndex, pageIndex, offset, &sectorFlags, sectorFlagsSize);
       break;
     }
@@ -67,21 +65,25 @@ void LogFS::releaseSector(uint32_t sectorIndex) {
   uint16_t flagsPerSector = _header.sectorSize / sectorFlagsSize;
   uint16_t flagsPerPage = _header.pageSize / sectorFlagsSize;
 
-  uint32_t sectorsMapSectorIndex = sectorIndex / flagsPerSector;
+  uint32_t sectorsOffset = _header.sectorsStartAddress / _header.sectorSize;
+  uint16_t sectorsMapSize = _header.sectorsMapStartAddress / _header.sectorSize;
+
+  uint32_t mapSectorIndex = sectorIndex - sectorsOffset;
+
+  uint32_t sectorsMapSectorIndex =
+    mapSectorIndex / flagsPerSector;
   uint32_t sectorsMapPageIndex =
-    sectorIndex - (sectorsMapSectorIndex * flagsPerSector) / flagsPerPage;
-  uint32_t sectorsMapOffset = (sectorIndex - (sectorsMapSectorIndex * flagsPerSector) -
+    (mapSectorIndex - (sectorsMapSectorIndex * flagsPerSector)) / flagsPerPage;
+  uint32_t sectorsMapOffset = (mapSectorIndex - (sectorsMapSectorIndex * flagsPerSector) -
                                (sectorsMapPageIndex * flagsPerPage)) % _header.pageSize *
                               sectorFlagsSize;
 
   LogFSSectorFlags sectorFlags;
   sectorFlags.flags = 0;
 
-//  cout << "release sector: " << sectorIndex << endl;
-
   _sectorsUsed--;
-  _fio->writeBytes(sectorsMapSectorIndex, sectorsMapPageIndex, sectorsMapOffset, &sectorFlags,
-                   sectorFlagsSize);
+  _fio->writeBytes(sectorsMapSectorIndex + sectorsMapSize, sectorsMapPageIndex, sectorsMapOffset,
+                   &sectorFlags, sectorFlagsSize);
   _fio->resetSector(sectorIndex);
 }
 
