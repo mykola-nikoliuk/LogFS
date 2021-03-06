@@ -134,7 +134,9 @@ uint16_t LogFS::getPagesUsed() {
   return 0;
 }
 
-// --- PUBLIC ---
+
+// ======================= PUBLIC =======================
+
 
 uint8_t LogFS::init() {
   _fio->readBytes(0, 0, 0, (uint8_t * ) & _header, sizeof(struct LogFSHeader));
@@ -188,6 +190,7 @@ uint8_t LogFS::format() {
 
 LogFSFile LogFS::createFile(char *name) {
   if (strlen(name) > LogGS_FILE_NAME_LENGTH - 1) return LogFSFile(LOGFS_ERR_LONG_FILE_NAME);
+  if (exist(name)) return LOGFS_ERR_FILE_ALREADY_EXIST;
 
   // look for free sector
   int32_t freeSectorIndex = allocateSector(LOGFS_ACTIVE_SECTOR | LOGFS_FILE_START_SECTOR);

@@ -27,6 +27,13 @@ bool createLongNameFile() {
   return fs.createFile(longName).getStatus() == LOGFS_ERR_LONG_FILE_NAME;
 }
 
+bool createTwoFilesWithSameName() {
+  LogFSRAMTest fs;
+  fs.createFile(defaultName);
+
+  return fs.createFile(defaultName).getStatus() == LOGFS_ERR_FILE_ALREADY_EXIST;
+}
+
 bool openFileNotExist() {
   LogFSRAMTest fs;
 
@@ -267,6 +274,7 @@ void testFile() {
 
   test("create file", createFile());
   test("create long name file", createLongNameFile());
+  test("create two files with same name", createTwoFilesWithSameName());
   test("open file not exist", openFileNotExist());
   test("create and open", createAndOpenFile());
   test("create and delete file", createAndDeleteFile());
