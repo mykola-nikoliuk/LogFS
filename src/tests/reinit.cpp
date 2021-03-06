@@ -73,6 +73,30 @@ namespace ReInitNS {
     return getSecondFS(&fs).getUsedSize() == usedSize;
   }
 
+  bool writeAfter() {
+    LogFSRAMTest fs;
+
+    uint8_t firstPartSize = 4;
+    uint8_t secondPartSize = 6;
+    uint8_t totalSize = firstPartSize + secondPartSize + 1;
+
+    char trimmedBody[totalSize];
+    memcpy(trimmedBody, body, firstPartSize + secondPartSize);
+    trimmedBody[totalSize - 1] = '\0';
+
+    fs.createFile(filename).write(trimmedBody, firstPartSize);
+
+    LogFS fs2 = getSecondFS(&fs);
+    LogFSFile file = fs2.openFile(filename);
+    file.write(trimmedBody + firstPartSize, secondPartSize + 1);
+
+    char buffer[totalSize];
+    file.read(buffer, file.size());
+
+    return file.size() == totalSize && strcmp(buffer, trimmedBody) == 0;
+
+  }
+
   void runTests() {
     cout << "Re Init:" << endl;
     test("create file", createFile());
@@ -82,6 +106,7 @@ namespace ReInitNS {
     test("read file", readFile());
     test("file size", fileSize());
     test("used size", usedSize());
+    test("write after", writeAfter());
   }
 
 }

@@ -64,7 +64,7 @@ void readFile(LogFSRAMTest* fs) {
   LogFSFile file = fs->openFile(buffer);
   if (file.getStatus() == LOGFS_OK) {
     char content[1024];
-    uint8_t readResult = file.read((uint8_t*)&content, file.size());
+    uint8_t readResult = file.read(&content, file.size());
     if (readResult == LOGFS_OK) {
       cout << content << endl;
     } else {
