@@ -31,14 +31,6 @@ public:
   uint32_t getCapacity() { return _capacity; }
   uint16_t getSectorSize() { return _sectorSize; }
   uint16_t getPageSize() { return _pageSize; }
-
-  // TODO: candidates to kill
-  virtual uint32_t writeByte(uint32_t address, uint8_t value) = 0;
-  uint32_t writeInt(uint32_t address, uint32_t value);
-  uint32_t writeShort(uint32_t address, uint16_t value);
-  virtual uint8_t readByte(uint32_t address) = 0;
-  uint32_t readInt(uint32_t address);
-  uint16_t readShort(uint32_t address);
 };
 
 #endif

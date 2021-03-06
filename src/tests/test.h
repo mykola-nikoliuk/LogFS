@@ -15,11 +15,6 @@ struct RAMFlashIO : public FlashIO {
 
   uint8_t data[MAX_MEMORY_SIZE];
 
-  uint32_t writeByte(uint32_t address, uint8_t value) {
-    data[address] = value;
-    return address + 1;
-  }
-
   uint8_t readByte(uint32_t address) {
     return data[address];
   }
