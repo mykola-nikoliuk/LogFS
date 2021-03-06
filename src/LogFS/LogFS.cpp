@@ -92,15 +92,9 @@ void LogFS::releaseSector(uint32_t sectorIndex) {
 
   _sectorsUsed--;
 
-  cout << "sector: " << sectorsMapSectorIndex + sectorsMapSize << endl;
-  cout << "page: " << sectorsMapPageIndex << endl;
-  cout << "offset: " << sectorsMapOffset << endl;
-
-
   _fio->writeBytes(sectorsMapSectorIndex + sectorsMapSize, sectorsMapPageIndex, sectorsMapOffset,
                    &sectorFlags, sectorFlagsSize);
 
-  cout << "release sector: " << sectorIndex << endl;
   _fio->resetSector(sectorIndex);
 }
 

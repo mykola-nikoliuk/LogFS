@@ -301,8 +301,6 @@ bool overflowSectorsMap() {
   char buffer[strlen(defaultLogs) + 1];
   file.read(buffer, file.size());
 
-  cout << buffer << endl;
-
   return strcmp(buffer, defaultLogs) == 0;
 }
 
