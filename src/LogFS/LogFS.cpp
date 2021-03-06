@@ -275,7 +275,6 @@ LogFSFile LogFS::createFile(char *name) {
   int32_t freeSectorIndex = allocateSector(LOGFS_ACTIVE_SECTOR | LOGFS_FILE_START_SECTOR);
 
   if (!freeSectorIndex) {
-    // TODO: clear used sectors map and check again
     return LogFSFile(LOGFS_ERR_LOW_SPACE_SECTORS);
   }
 
@@ -284,8 +283,6 @@ LogFSFile LogFS::createFile(char *name) {
   strcpy(fileHeader.name, name);
 
   _fio->writeBytes(freeSectorIndex, 0, 0, &fileHeader, fileHeaderSize);
-
-  // TODO: fill the file structure
 
   return LogFSFile(this, freeSectorIndex);
 }
@@ -352,24 +349,17 @@ bool LogFS::exist(char *name) {
 }
 
 uint32_t LogFS::getTotalSize() {
-  // TODO: check for init
-
   return _header.sectorsAmount * (_header.sectorSize - getSectorAddressSize());
 }
 
 uint32_t LogFS::getAvailableSize() {
-  // TODO: check for init
-
   return (_header.sectorsAmount - _sectorsUsed) * (_header.sectorSize - getSectorAddressSize());
 }
 
 uint32_t LogFS::getUsedSize() {
-  // TODO: check for init
-
   return _sectorsUsed * (_header.sectorSize - getSectorAddressSize());
 }
 
 LogFSDirectory LogFS::readFiles() {
-  // TODO: check for init
   return LogFSDirectory(this);
 }

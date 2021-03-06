@@ -9,7 +9,6 @@
 using namespace std;
 
 void LogFSFile::setLastSectorOffset(uint16_t offset) {
-  // TODO: implement
   _lastSectorOffset = offset;
 
   uint16_t pageSize = _fs->_header.pageSize;
@@ -85,7 +84,6 @@ LogFSFile::LogFSFile(LogFS *fs, uint32_t sectorIndex) {
   _status = LOGFS_OK;
   _startSectorIndex = sectorIndex;
 
-// TODO: should be filled
   _lastSectorIndex = sectorIndex;
   _lastSectorOffset = _fs->_header.sectorSize - _fs->getSectorAddressSize();
   _readSectorIndex = sectorIndex;

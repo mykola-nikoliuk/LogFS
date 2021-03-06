@@ -31,12 +31,6 @@ struct LogFSSectorFlags {
   void removeFlags(uint8_t newFlags) {
     flags &= ~newFlags;
   }
-
-  // TODO: candidate to remove
-  LogFSSectorFlags* operator=(LogFSSectorFlags* tableFile) {
-    memcpy(this, tableFile, sizeof(struct LogFSSectorFlags));
-    return tableFile;
-  }
 };
 
 #endif
