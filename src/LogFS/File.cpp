@@ -1,11 +1,83 @@
 #include "math.h"
 #include "LogFS.h"
 #include "File.h"
+#include "FileHeader.h"
 #include "config.h"
 
 #include "iostream"
 
 using namespace std;
+
+void LogFSFile::setLastSectorOffset(uint16_t offset) {
+  // TODO: implement
+  _lastSectorOffset = offset;
+
+  uint16_t pageSize = _fs->_header.pageSize;
+  uint16_t sectorSize = _fs->_header.sectorSize;
+  uint16_t sectorOffsetSize = sizeof(_lastSectorOffset);
+  uint16_t lastAvailableAddress = sectorSize - sectorSize - sectorOffsetSize;
+
+  if (_EOFOffsetAddress > lastAvailableAddress) {
+    _EOFOffsetAddress = sizeof(struct LogFSFileHeader);
+    // TODO: clear addresses
+  }
+
+  _fs->_fio->writeBytes(
+    _startSectorIndex,
+    _EOFOffsetAddress / pageSize,
+    _EOFOffsetAddress % pageSize,
+    &_lastSectorOffset,
+    sectorOffsetSize
+  );
+  _EOFOffsetAddress += sectorOffsetSize;
+}
+
+void LogFSFile::fillEOFOffset() {
+  uint16_t offset = sizeof(struct LogFSFileHeader);
+  uint16_t pageSize = _fs->_header.pageSize;
+  uint16_t sectorOffsetSize = sizeof(_lastSectorOffset);
+  uint16_t maxSectorOffset = -1;
+  uint16_t sectorSize = _fs->_header.sectorSize;
+  uint16_t sectorAddressSize = _fs->getSectorAddressSize();
+
+  uint8_t page[pageSize];
+  int16_t readPage = -1;
+  uint16_t pageIndex = offset / _fs->_header.pageSize;
+
+  for (; offset < sectorSize - sectorAddressSize; offset += sectorOffsetSize) {
+    if (pageIndex != readPage) {
+      _fs->_fio->readPage(_startSectorIndex, pageIndex, page);
+      readPage = pageIndex;
+    }
+
+    uint16_t lastSectorOffset;
+    memcpy(&lastSectorOffset, &page[offset], sectorOffsetSize);
+
+    if (lastSectorOffset == maxSectorOffset) return;
+
+    _lastSectorOffset = lastSectorOffset;
+  }
+}
+
+void LogFSFile::fillEOFSector() {
+  uint16_t pageSize = _fs->_header.pageSize;
+  uint16_t sectorAddressSize = _fs->getSectorAddressSize();
+
+  uint32_t maxPageIndex = _fs->_header.sectorSize / pageSize - 1;
+  uint32_t maxSectorIndex = -1;
+  uint32_t sectorIndex = _startSectorIndex;
+
+  while (sectorIndex != maxSectorIndex) {
+    _lastSectorIndex = sectorIndex;
+    _fs->_fio->readBytes(
+      sectorIndex,
+      maxPageIndex,
+      pageSize - sectorAddressSize,
+      &sectorIndex,
+      sectorAddressSize
+    );
+  }
+}
 
 LogFSFile::LogFSFile(LogFS *fs, uint32_t sectorIndex) {
   _fs = fs;
@@ -17,17 +89,15 @@ LogFSFile::LogFSFile(LogFS *fs, uint32_t sectorIndex) {
   _lastSectorOffset = _fs->_header.sectorSize - _fs->getSectorAddressSize();
   _readSectorIndex = sectorIndex;
   _readSectorOffset = _lastSectorOffset;
+  _EOFOffsetAddress = sizeof(struct LogFSFileHeader);
+  fillEOFOffset();
+  fillEOFSector();
 }
 
-void LogFSFile::setLastSectorOffset(uint16_t offset) {
-  // TODO: implement
-  _lastSectorOffset = offset;
-}
-
-uint8_t LogFSFile::write(void* data, uint32_t length) {
+uint8_t LogFSFile::write(void *data, uint32_t length) {
   if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
 
-  uint8_t* pData = (uint8_t*)data;
+  uint8_t *pData = (uint8_t *) data;
 
   uint16_t pageSize = _fs->_header.pageSize;
   uint16_t sectorSize = _fs->_header.sectorSize;
@@ -94,10 +164,10 @@ uint8_t LogFSFile::write(void* data, uint32_t length) {
   return LOGFS_OK;
 }
 
-uint8_t LogFSFile::read(void* data, uint32_t length) {
+uint8_t LogFSFile::read(void *data, uint32_t length) {
   if (_status) return LOGFS_ERR_FILE_NOT_OPENED;
 
-  uint8_t* pData = (uint8_t*)data;
+  uint8_t *pData = (uint8_t *) data;
 
   uint16_t pageSize = _fs->_header.pageSize;
   uint16_t sectorSize = _fs->_header.sectorSize;

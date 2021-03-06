@@ -4,6 +4,7 @@
 
 char filename[] = "filename.txt";
 char filename2[] = "anotherFile.txt";
+char body[] = "file content can be any but we are using string for this tests";
 
 namespace ReInitNS {
 
@@ -40,12 +41,25 @@ namespace ReInitNS {
     return getSecondFS(&fs).openFile(filename).getStatus() == LOGFS_OK;
   }
 
+  bool fileSize() {
+    LogFSRAMTest fs;
+    LogFSFile file = fs.createFile(filename);
+    file.write(body, strlen(body) + 1);
+    uint16_t fileSize = file.size();
+
+    LogFS fs2 = getSecondFS(&fs);
+
+    LogFSFile file2 = fs2.openFile(filename);
+    return file2.size() == fileSize;
+  }
+
   void runTests() {
     cout << "Re Init:" << endl;
     test("create file", createFile());
     test("create two files", createTwoFiles());
     test("delete files", deleteFile());
     test("open file", openFile());
+    test("file size", fileSize());
   }
 
 }
