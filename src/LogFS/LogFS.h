@@ -19,6 +19,7 @@ class LogFS {
     uint32_t getPageIndex(uint32_t offset);
     uint32_t allocateSector(uint8_t flags);
     void releaseSector(uint32_t sectorIndex);
+    void cleanSelectorsMap();
     uint32_t readFileHeader(char* name, LogFSFileHeader* fileHeader);
     uint16_t getSectorAddressSize();
     uint32_t countSectorsUsed();

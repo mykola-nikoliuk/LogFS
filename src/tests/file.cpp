@@ -287,6 +287,25 @@ bool checkWriteSize() {
   return file.size() == logLength * 2;
 }
 
+bool overflowSectorsMap() {
+  LogFSRAMTest fs;
+
+  uint16_t filesCount = MAX_MEMORY_SIZE / SECTOR_SIZE;
+  while (filesCount--) {
+    if (fs.createFile(defaultName).getStatus() != LOGFS_OK) return false;
+    if (fs.deleteFile(defaultName) != LOGFS_OK) return false;
+  }
+  LogFSFile file = fs.createFile(defaultName);
+  file.write(defaultLogs, strlen(defaultLogs) + 1);
+
+  char buffer[strlen(defaultLogs) + 1];
+  file.read(buffer, file.size());
+
+  cout << buffer << endl;
+
+  return strcmp(buffer, defaultLogs) == 0;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -317,6 +336,8 @@ void testFile() {
   test("read empty files list", readEmptyFiles());
   test("read created files list", readCreatedFiles());
   test("check write size", checkWriteSize());
+
+  test("overflow sectors map", overflowSectorsMap());
 
   // page release after write with full storage
   // read files list

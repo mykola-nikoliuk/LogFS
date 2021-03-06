@@ -31,6 +31,8 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
   int32_t readPageIndex = 0;
   uint32_t freeSectorIndex = 0;
 
+  bool hasSectorsToClear = false;
+
   for (uint32_t i = 0; i < _header.sectorsAmount; i++) {
     uint32_t sectorIndex =
       i / _header.sectorSize + _header.sectorsMapStartAddress / _header.sectorSize;
@@ -45,7 +47,9 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
     uint16_t offset = i % _header.pageSize;
     sectorFlags.flags = page[i];
 
-    if (sectorFlags.isEmpty()) {
+    hasSectorsToClear |= sectorFlags.isDeleted();
+
+    if (sectorFlags.isEmpty() && !sectorFlags.isDeleted()) {
       freeSectorIndex = i + sectorsIndexOffset;
       sectorFlags.flags = flags;
       _sectorsUsed++;
@@ -53,6 +57,11 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
       _fio->writeBytes(sectorIndex, pageIndex, offset, &sectorFlags, sectorFlagsSize);
       break;
     }
+  }
+
+  if (!freeSectorIndex && hasSectorsToClear) {
+    cleanSelectorsMap();
+    freeSectorIndex = allocateSector(flags);
   }
 
   return freeSectorIndex;
@@ -82,9 +91,46 @@ void LogFS::releaseSector(uint32_t sectorIndex) {
   sectorFlags.flags = 0;
 
   _sectorsUsed--;
+
+  cout << "sector: " << sectorsMapSectorIndex + sectorsMapSize << endl;
+  cout << "page: " << sectorsMapPageIndex << endl;
+  cout << "offset: " << sectorsMapOffset << endl;
+
+
   _fio->writeBytes(sectorsMapSectorIndex + sectorsMapSize, sectorsMapPageIndex, sectorsMapOffset,
                    &sectorFlags, sectorFlagsSize);
+
+  cout << "release sector: " << sectorIndex << endl;
   _fio->resetSector(sectorIndex);
+}
+
+void LogFS::cleanSelectorsMap() {
+  LogFSSectorFlags sectorFlags;
+  uint16_t sectorsFlagsSize = sizeof(struct LogFSSectorFlags);
+  uint16_t sectorsToClean = _header.sectorsAmount / _header.sectorSize * sectorsFlagsSize + 1;
+  uint32_t sectorsMapOffset = _header.sectorsMapStartAddress / _header.sectorSize;
+
+  uint16_t pagePerSector = _header.sectorSize / _header.pageSize;
+  for (uint16_t mapSectorIndex = 0; mapSectorIndex < sectorsToClean; mapSectorIndex++) {
+    uint8_t sector[_header.sectorSize];
+    uint32_t sectorIndex = mapSectorIndex + sectorsMapOffset;
+
+    for (uint16_t pageIndex = 0; pageIndex < pagePerSector; pageIndex++) {
+      _fio->readPage(sectorIndex, pageIndex, &sector[pageIndex * _header.pageSize]);
+    }
+    for (uint16_t offset = 0; offset < _header.sectorSize; offset += sectorsFlagsSize) {
+      memcpy(&sectorFlags, sector + offset, sectorsFlagsSize);
+      if (sectorFlags.isDeleted()) {
+        sectorFlags.flags = -1;
+        memcpy(sector + offset, &sectorFlags, sectorsFlagsSize);
+      }
+    }
+
+    _fio->resetSector(sectorIndex);
+    for (uint16_t pageIndex = 0; pageIndex < pagePerSector; pageIndex++) {
+      _fio->writePage(sectorIndex, pageIndex, &sector[pageIndex * _header.pageSize]);
+    }
+  }
 }
 
 uint32_t LogFS::readFileHeader(char *name, LogFSFileHeader *fileHeader) {
