@@ -1,4 +1,4 @@
 .idea
-/src/**/*.o
-/logfs
+*.o
+/testFS
 /cmake-build-debug

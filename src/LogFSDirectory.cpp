@@ -1,6 +1,6 @@
 #include <string.h>
 #include "LogFS.h"
-#include "Directory.h"
+#include "LogFSDirectory.h"
 
 
 LogFSDirectory::LogFSDirectory(LogFS *fs) {

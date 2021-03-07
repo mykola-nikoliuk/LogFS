@@ -1,4 +1,4 @@
-#include "./Header.h"
+#include "./LogFSHeader.h"
 
 LogFSHeader::LogFSHeader() {
   version = 0;

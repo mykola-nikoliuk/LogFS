@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "FlashIO.h"
-#include "SectorFlags.h"
+#include "LogFSSectorFlags.h"
 #include "config.h"
 
 class LogFS;

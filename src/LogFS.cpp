@@ -1,9 +1,9 @@
 #include <string.h>
 #include <math.h>
-#include "./LogFS.h"
-#include "./SectorFlags.h" // ??
-#include "./FileHeader.h" // ??
-#include "./Header.h" // ??
+#include "LogFS.h"
+#include "./LogFSSectorFlags.h" // ??
+#include "./LogFSFileHeader.h" // ??
+#include "./LogFSHeader.h" // ??
 #include "./config.h"
 
 #include <iostream>

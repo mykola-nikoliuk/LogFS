@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <iostream>
 #include <string.h>
-#include "../LogFS/LogFS.h"
-#include "./test.h"
-#include "./file.h"
+#include "../src/LogFS.h"
+#include "test.h"
+#include "file.h"
 
 using namespace std;
 

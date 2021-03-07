@@ -2,7 +2,7 @@
 #define TEST_H
 
 #include <stdint.h>
-#include "../LogFS/LogFS.h"
+#include "../src/LogFS.h"
 #include <iostream>
 
 #define SECTOR_SIZE 4096

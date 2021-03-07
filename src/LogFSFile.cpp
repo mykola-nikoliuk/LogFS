@@ -1,7 +1,7 @@
 #include "math.h"
 #include "LogFS.h"
-#include "File.h"
-#include "FileHeader.h"
+#include "LogFSFile.h"
+#include "LogFSFileHeader.h"
 #include "config.h"
 
 #include "iostream"

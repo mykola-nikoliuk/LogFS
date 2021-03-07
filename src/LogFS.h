@@ -2,11 +2,11 @@
 #define LOGFS_H
 
 #include "FlashIO.h"
-#include "Header.h"
-#include "FileHeader.h"
-#include "SectorFlags.h"
-#include "Directory.h"
-#include "File.h"
+#include "LogFSHeader.h"
+#include "LogFSFileHeader.h"
+#include "LogFSSectorFlags.h"
+#include "LogFSDirectory.h"
+#include "LogFSFile.h"
 #include <stdint.h>
 
 class LogFS {
