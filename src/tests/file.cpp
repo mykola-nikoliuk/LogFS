@@ -304,6 +304,24 @@ bool overflowSectorsMap() {
   return strcmp(buffer, defaultLogs) == 0;
 }
 
+bool fillAllTheStorage() {
+  LogFSRAMTest fs;
+
+  LogFSFile file = fs.createFile(defaultName);
+  uint32_t counter = 0;
+
+  while (file.write(defaultLogs, strlen(defaultLogs)) == LOGFS_OK) {
+    counter++;
+    if (counter % 10 == 0) {
+//      cout << "log: " << counter << endl;
+    }
+  }
+
+  fs.deleteFile(defaultName);;
+
+  return fs.getUsedSize() == 0;
+}
+
 void testFile() {
   cout << "File:" << endl;
 
@@ -336,7 +354,7 @@ void testFile() {
   test("check write size", checkWriteSize());
 
   test("overflow sectors map", overflowSectorsMap());
+  test("fill all the storage", fillAllTheStorage());
 
   // page release after write with full storage
-  // read files list
 }

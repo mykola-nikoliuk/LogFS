@@ -24,6 +24,7 @@ private:
   void setLastSectorOffset(uint16_t offset);
   void fillEOFOffset();
   void fillEOFSector();
+  void cleanEOTRecords();
 
 public:
   LogFSFile(LogFS *fs, uint32_t sectorIndex);

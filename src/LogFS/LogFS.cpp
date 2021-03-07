@@ -95,6 +95,7 @@ void LogFS::releaseSector(uint32_t sectorIndex) {
   _fio->writeBytes(sectorsMapSectorIndex + sectorsMapSize, sectorsMapPageIndex, sectorsMapOffset,
                    &sectorFlags, sectorFlagsSize);
 
+//  cout << "release sector: " << sectorIndex << endl;
   _fio->resetSector(sectorIndex);
 }
 
@@ -307,11 +308,15 @@ uint8_t LogFS::deleteFile(char *name) {
   uint8_t sectorAddressSize = getSectorAddressSize();
   uint16_t sectorBodySize = _header.sectorSize - sectorAddressSize;
 
-  uint16_t previousSectorIndex = sectorIndex;
+  uint32_t previousSectorIndex = sectorIndex;
   uint32_t nextSectorIndex;
-  uint32_t maxAddressValue = -1;
 
   while (true) {
+
+//    cout << "sector: " << previousSectorIndex << endl;
+//    cout << "page: " << sectorBodySize / _header.pageSize << endl;
+//    cout << "offset: " << sectorBodySize % _header.pageSize << endl;
+
     _fio->readBytes(
       previousSectorIndex,
       sectorBodySize / _header.pageSize,
@@ -321,7 +326,7 @@ uint8_t LogFS::deleteFile(char *name) {
     );
     releaseSector(previousSectorIndex);
 
-    if (nextSectorIndex == maxAddressValue) {
+    if (nextSectorIndex == -1) {
       break;
     }
 

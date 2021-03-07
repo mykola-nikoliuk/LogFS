@@ -99,6 +99,29 @@ namespace ReInitNS {
 
   }
 
+  bool writeManyTimes() {
+    LogFSRAMTest fs;
+
+    char log[SECTOR_SIZE];
+
+    LogFSFile file = fs.createFile(filename);
+    for (uint16_t i = 0; i < SECTOR_SIZE; i++) {
+      log[i] = (i % 10) + 48;
+      if (i == SECTOR_SIZE - 1) {
+        log[i] = '\0';
+      }
+      file.write(log + i, 1);
+    }
+
+    LogFS fs2 = getSecondFS(&fs);
+
+    char result[SECTOR_SIZE];
+    LogFSFile file2 = fs2.openFile(filename);
+    file2.read(result, file.size());
+
+    return strcmp(result, log) == 0;
+  }
+
   void runTests() {
     cout << "Re Init:" << endl;
     test("create file", createFile());
@@ -109,6 +132,7 @@ namespace ReInitNS {
     test("file size", fileSize());
     test("used size", usedSize());
     test("write after", writeAfter());
+    test("write many times", writeManyTimes());
   }
 
 }

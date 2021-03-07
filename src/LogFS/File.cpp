@@ -14,12 +14,14 @@ void LogFSFile::setLastSectorOffset(uint16_t offset) {
   uint16_t pageSize = _fs->_header.pageSize;
   uint16_t sectorSize = _fs->_header.sectorSize;
   uint16_t sectorOffsetSize = sizeof(_lastSectorOffset);
-  uint16_t lastAvailableAddress = sectorSize - sectorSize - sectorOffsetSize;
+  uint32_t sectorAddressSize = _fs->getSectorAddressSize();
+  uint16_t lastAvailableAddress = sectorSize - sectorAddressSize - sectorOffsetSize;
 
   if (_EOFOffsetAddress > lastAvailableAddress) {
-    _EOFOffsetAddress = sizeof(struct LogFSFileHeader);
-    // TODO: clear addresses
+    cleanEOTRecords();
   }
+
+//  cout << "eof: " << _startSectorIndex << " " << _EOFOffsetAddress / pageSize << " " << _EOFOffsetAddress % pageSize << endl;
 
   _fs->_fio->writeBytes(
     _startSectorIndex,
@@ -79,6 +81,35 @@ void LogFSFile::fillEOFSector() {
   }
 }
 
+void LogFSFile::cleanEOTRecords() {
+  _EOFOffsetAddress = sizeof(struct LogFSFileHeader);
+//  cout << "====> OUT OF file sector" << endl;
+
+  uint16_t pageSize = _fs->_header.pageSize;
+  uint16_t lastPageIndex = _fs->_header.sectorSize / _fs->_header.pageSize - 1;
+  uint16_t sectorAddressSize = _fs->getSectorAddressSize();
+
+
+  LogFSFileHeader fileHeader;
+  uint32_t nextSectorIndex;
+  uint8_t page[_fs->_header.pageSize];
+
+  _fs->_fio->readPage(_startSectorIndex, 0, page);
+  memcpy(&fileHeader, page, sizeof(struct LogFSFileHeader));
+
+  _fs->_fio->readPage(_startSectorIndex, lastPageIndex, page);
+  memcpy(&nextSectorIndex, page + pageSize - sectorAddressSize, sectorAddressSize);
+
+  _fs->_fio->resetSector(_startSectorIndex);
+
+  _fs->_fio->writeBytes(_startSectorIndex, 0, 0, &fileHeader, sizeof(struct LogFSFileHeader));
+  _fs->_fio->writeBytes(_startSectorIndex, lastPageIndex, pageSize - sectorAddressSize,
+                        &nextSectorIndex, sectorAddressSize);
+
+//  cout << "nextSectorIndex: " << nextSectorIndex << endl;
+//  cout << "header: " << fileHeader.name << endl;
+}
+
 LogFSFile::LogFSFile(LogFS *fs, uint32_t sectorIndex) {
   _fs = fs;
   _status = LOGFS_OK;
@@ -125,13 +156,14 @@ uint8_t LogFSFile::write(void *data, uint32_t length) {
 //      cout << "sector: " << _lastSectorIndex << endl;
 //      cout << "page: " << pageIndex << endl;
 //      cout << "offset: " << pageOffset << endl;
-//      cout << "len: " << writeLength << endl << endl;
+//      cout << "len: " << writeLength << endl;
+//      cout << "value: " << pData[totalWrote] << endl << endl;
 
       _fs->_fio->writeBytes(
         _lastSectorIndex,
         pageIndex,
         pageOffset,
-        &pData[totalWrote],
+        pData + totalWrote,
         writeLength
       );
 
@@ -146,6 +178,14 @@ uint8_t LogFSFile::write(void *data, uint32_t length) {
     setLastSectorOffset(0);
     uint32_t newSectorIndex = _fs->allocateSector(LOGFS_ACTIVE_SECTOR);
 
+    // TODO: calculate size before write
+    if (!newSectorIndex) return LOGFS_ERR_LOW_SPACE_SECTORS;
+
+//    cout << "prev sector: " << _lastSectorIndex << endl;
+//    cout << "new file sector: " << newSectorIndex << endl;
+//    cout << "lastPageIndex: " << lastPageIndex << endl;
+//    cout << "offset: " << pageSize - sectorAddressSize << endl;
+
     _fs->_fio->writeBytes(
       _lastSectorIndex,
       lastPageIndex,
@@ -155,9 +195,8 @@ uint8_t LogFSFile::write(void *data, uint32_t length) {
     );
     _lastSectorIndex = newSectorIndex;
 
-//    cout << endl << "add new sector: " << newSectorIndex << endl;
 
-    write(&pData[totalWrote], length - totalWrote);
+    write(pData + totalWrote, length - totalWrote);
   }
 
   return LOGFS_OK;
@@ -197,7 +236,7 @@ uint8_t LogFSFile::read(void *data, uint32_t length) {
         _readSectorIndex,
         pageIndex,
         pageOffset,
-        &pData[totalRead],
+        pData + totalRead,
         readLength
       );
       totalRead += readLength;
@@ -225,7 +264,7 @@ uint8_t LogFSFile::read(void *data, uint32_t length) {
     );
     _readSectorIndex = nextSectorIndex;
 
-    read(&pData[totalRead], length - totalRead);
+    read(pData + totalRead, length - totalRead);
   }
 
   return LOGFS_OK;
