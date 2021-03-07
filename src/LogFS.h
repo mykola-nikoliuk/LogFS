@@ -1,7 +1,7 @@
 #ifndef LOGFS_H
 #define LOGFS_H
 
-#include "FlashIO.h"
+#include "LogFSStorageIO.h"
 #include "LogFSHeader.h"
 #include "LogFSFileHeader.h"
 #include "LogFSSectorFlags.h"
@@ -13,7 +13,7 @@ class LogFS {
 
   private:
     LogFSHeader _header;
-    FlashIO* _fio;
+    LogFSStorageIO* _fio;
     uint32_t _sectorsUsed;
 
     uint32_t getPageIndex(uint32_t offset);
@@ -27,7 +27,7 @@ class LogFS {
     friend class LogFSDirectory;
 
   public:
-    LogFS(FlashIO* fio, bool runInit = false);
+    LogFS(LogFSStorageIO* fio, bool runInit = false);
 
     uint8_t init();
     uint8_t format();

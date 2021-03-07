@@ -34,7 +34,7 @@ bool differentVersion() {
 
 bool formatPageSize() {
   uint16_t pageSize = 64;
-  RAMFlashIO fio(MAX_MEMORY_SIZE, SECTOR_SIZE, pageSize);
+  RAMIO fio(MAX_MEMORY_SIZE, SECTOR_SIZE, pageSize);
   LogFS fs(&fio);
   fs.format();
   fs.init();
@@ -42,19 +42,19 @@ bool formatPageSize() {
 }
 
 bool formatLowSpaceForHeader() {
-  RAMFlashIO fio(SECTOR_SIZE - 1);
+  RAMIO fio(SECTOR_SIZE - 1);
   LogFS fs(&fio);
   return fs.format() == LOGFS_ERR_LOW_SPACE_HEADER;
 }
 
 bool formatLowSpaceForSectorsMap() {
-  RAMFlashIO fio(SECTOR_SIZE * 2 - 1);
+  RAMIO fio(SECTOR_SIZE * 2 - 1);
   LogFS fs(&fio);
   return fs.format() == LOGFS_ERR_LOW_SPACE_SECTORS_MAP;
 }
 
 bool formatLowSpaceForSectors() {
-  RAMFlashIO fio(SECTOR_SIZE * 3 - 1);
+  RAMIO fio(SECTOR_SIZE * 3 - 1);
   LogFS fs(&fio);
   return fs.format() == LOGFS_ERR_LOW_SPACE_SECTORS;
 }

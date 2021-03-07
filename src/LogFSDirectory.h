@@ -2,7 +2,7 @@
 #define LOGFS_DIRECTORY_H
 
 #include <stdint.h>
-#include "FlashIO.h"
+#include "LogFSStorageIO.h"
 #include "LogFSSectorFlags.h"
 #include "config.h"
 

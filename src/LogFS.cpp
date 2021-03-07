@@ -10,7 +10,7 @@
 
 using namespace std;
 
-LogFS::LogFS(FlashIO *fio, bool autoInit) {
+LogFS::LogFS(LogFSStorageIO *fio, bool autoInit) {
   _fio = fio;
   if (autoInit) init();
 }

@@ -1,5 +1,5 @@
-#ifndef FlashIO_H
-#define FlashIO_H
+#ifndef LOGFS_STORAGEIO_H
+#define LOGFS_STORAGEIO_H
 
 #include <stdint.h>
 
@@ -7,14 +7,14 @@
 
 using namespace std;
 
-struct FlashIO {
+struct LogFSStorageIO {
 private:
   uint32_t _capacity;
   uint16_t _pageSize;
   uint16_t _sectorSize;
 
 public:
-  FlashIO(uint32_t capacity, uint16_t sectorSize, uint16_t pageSize) {
+  LogFSStorageIO(uint32_t capacity, uint16_t sectorSize, uint16_t pageSize) {
     _capacity = capacity;
     _sectorSize = sectorSize;
     _pageSize = pageSize;
