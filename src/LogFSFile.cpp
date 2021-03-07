@@ -4,10 +4,6 @@
 #include "LogFSFileHeader.h"
 #include "config.h"
 
-#include "iostream"
-
-using namespace std;
-
 void LogFSFile::setLastSectorOffset(uint16_t offset) {
   _lastSectorOffset = offset;
 

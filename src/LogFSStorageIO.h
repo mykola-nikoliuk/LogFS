@@ -3,10 +3,6 @@
 
 #include <stdint.h>
 
-#include <iostream>
-
-using namespace std;
-
 struct LogFSStorageIO {
 private:
   uint32_t _capacity;

@@ -6,10 +6,6 @@
 #include "./LogFSHeader.h" // ??
 #include "./config.h"
 
-#include <iostream>
-
-using namespace std;
-
 LogFS::LogFS(LogFSStorageIO *fio, bool autoInit) {
   _fio = fio;
   if (autoInit) init();
@@ -60,7 +56,7 @@ uint32_t LogFS::allocateSector(uint8_t flags) {
   }
 
   if (!freeSectorIndex && hasSectorsToClear) {
-    cleanSelectorsMap();
+    cleanSectorsMap();
     freeSectorIndex = allocateSector(flags);
   }
 
@@ -99,7 +95,7 @@ void LogFS::releaseSector(uint32_t sectorIndex) {
   _fio->resetSector(sectorIndex);
 }
 
-void LogFS::cleanSelectorsMap() {
+void LogFS::cleanSectorsMap() {
   LogFSSectorFlags sectorFlags;
   uint16_t sectorsFlagsSize = sizeof(struct LogFSSectorFlags);
   uint16_t sectorsToClean = _header.sectorsAmount / _header.sectorSize * sectorsFlagsSize + 1;

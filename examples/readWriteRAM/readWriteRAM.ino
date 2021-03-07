@@ -1,8 +1,8 @@
 #include <LogFS.h>
 #include <string.h>
 
-#define SECTOR_SIZE 4096
-#define PAGE_SIZE 256
+#define SECTOR_SIZE 256
+#define PAGE_SIZE 64
 #define MAX_MEMORY_SIZE 4 * SECTOR_SIZE
 
 char filename[] = "file.txt";
