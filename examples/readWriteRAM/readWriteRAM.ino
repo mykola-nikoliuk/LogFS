@@ -14,10 +14,6 @@ struct RAMIO : public LogFSStorageIO {
 
   uint8_t data[MAX_MEMORY_SIZE];
 
-  uint8_t readByte(uint32_t address) {
-    return data[address];
-  }
-
   void resetChip() {
     for (uint32_t i = 0; i < getCapacity(); i++) {
       data[i] = 0xFF;
