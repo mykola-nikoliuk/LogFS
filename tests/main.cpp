@@ -9,6 +9,7 @@ int main() {
   testFile();
   ReInitNS::runTests();
   testStatus();
+  RAMIO::stats();
   testInteractive();
 }
 

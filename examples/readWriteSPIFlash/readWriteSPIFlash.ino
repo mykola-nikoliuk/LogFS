@@ -65,7 +65,7 @@ struct FlashIO : public LogFSStorageIO {
     SPI.transfer((absolutePageIndex >>  0) & 0xFF);
     SPI.transfer(0);
     for (int i = 0; i < PAGE_SIZE; ++i) {
-      SPI.transfer(((uint8_t*)pageIndex)[i]);
+      SPI.transfer(((uint8_t*)pageData)[i]);
     }
     digitalWrite(SS, HIGH);
     not_busy();

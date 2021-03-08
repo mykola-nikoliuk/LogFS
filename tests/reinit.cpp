@@ -123,7 +123,7 @@ namespace ReInitNS {
   }
 
   void runTests() {
-    cout << "Re Init:" << endl;
+    std::cout << "Re Init:" << std::endl;
     test("create file", createFile());
     test("create two files", createTwoFiles());
     test("delete files", deleteFile());
